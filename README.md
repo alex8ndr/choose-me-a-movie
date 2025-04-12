@@ -5,4 +5,4 @@ In the context of the pandemic, when we've been spending more time at home and l
 Choose Me a Movie is a simple website that helps you decide on a movie to watch through a series of questions hand-picked to ensure our users' satisfaction. The site has many advanced features, including a button to return to the previous question and an option for additional recommendations based on the same criteria.
 
 
-Try it out at https://www.choosemeamovie.com!
+Try it out at [https://choosemeamovie.alext.dev/](https://choosemeamovie.alext.dev/)!
