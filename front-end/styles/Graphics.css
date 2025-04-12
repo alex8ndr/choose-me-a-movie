@@ -3,7 +3,17 @@
   --primary-color: #6419e6;
   --secondary-color: #4facfe;
   --accent-color: #ff8a00;
-  --background-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  
+  --bg-opacity: 0.3; 
+  
+  --background-gradient: linear-gradient(135deg, 
+    rgba(161, 140, 209, var(--bg-opacity)) 0%,
+    rgba(139, 127, 219, var(--bg-opacity)) 25%,
+    rgba(111, 134, 214, var(--bg-opacity)) 50%,
+    rgba(90, 159, 230, var(--bg-opacity)) 75%,
+    rgba(79, 172, 254, var(--bg-opacity)) 100%
+  );
+  
   --card-bg: rgba(255, 255, 255, 0.95);
   --text-color: #333;
   --text-light: #666;
