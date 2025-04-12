@@ -1,264 +1,268 @@
-//const api_key = 'b232ad51ce7402046296b8bc8b7c35d8';
-//const base_url = 'https://api.themoviedb.org/3/discover/movie/';
-//const api_url = base_url + "?api_key=" + api_key;
-//options = {"primary_release_year":2010}
-//const range = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
+/**
+ * Choose Me a Movie
+ * JavaScript for handling user preferences and fetching movie recommendations
+ */
 
-var options = {};
-var pageNumber = 1;
+// Global variables
+let options = {};
+let pageNumber = 1;
 
-
-function hideSub() {
-    document.getElementById("subquestion1").style.visibility = "hidden";
-}
-
-function showSub() {
-    document.getElementById("subquestion1").style.visibility = "visible";
-}
-
+/**
+ * Store user preferences in session storage
+ */
 function language() {
-    sessionStorage.pageNumber = 1;
-    sessionStorage.setItem("language", document.querySelector('input[name="language"]:checked').value);
-    console.log(sessionStorage.getItem("language"));
+    const selectedLanguage = document.querySelector('input[name="language"]:checked');
+    if (selectedLanguage) {
+        sessionStorage.pageNumber = 1;
+        sessionStorage.setItem("language", selectedLanguage.value);
+        console.log("Language selected:", sessionStorage.getItem("language"));
+    }
 }
 
 function genre() {
-    sessionStorage.setItem("genre", document.querySelector('input[name="genre"]:checked').value);
-    console.log(sessionStorage.getItem("numMovie"));
-    console.log(sessionStorage.getItem("genre"));
+    const selectedGenre = document.querySelector('input[name="genre"]:checked');
+    if (selectedGenre) {
+        sessionStorage.setItem("genre", selectedGenre.value);
+        console.log("Genre selected:", sessionStorage.getItem("genre"));
+    }
 }
 
 function date() {
-    var years = document.querySelector('input[name="date"]:checked').value;
-    //get current date
-    var current = new Date();
-    if (years == "1") delta = 1;
-    else if (years == "5") delta = 5;
-    else if (years == "10") delta = 10;
-    else if (years == "20") delta = 20;
-    else if (years == "40") delta = 40;
-    else if (years == "100") delta = 100;
+    const selectedYears = document.querySelector('input[name="date"]:checked');
+    if (!selectedYears) return;
+    
+    const years = selectedYears.value;
+    const current = new Date();
+    let delta;
+    
+    // Convert selection to actual year span
+    if (years === "1") delta = 1;
+    else if (years === "5") delta = 5;
+    else if (years === "10") delta = 10;
+    else if (years === "20") delta = 20;
+    else if (years === "40") delta = 40;
+    else if (years === "100") delta = 100;
 
-    var minDate = new Date(current.getFullYear() - delta, current.getMonth(), current.getDate());
-
-    //format date as YYYY-MM-DD
-    minDate = minDate.toISOString().split('T')[0];
-
-    sessionStorage.setItem("date", minDate);
-
-    //sessionStorage.setItem("date", document.querySelector('input[name="date"]:checked').value);
-    console.log(sessionStorage.getItem("numMovie"));
-    console.log(sessionStorage.getItem("genre"));
-    console.log(sessionStorage.getItem("date"));
+    const minDate = new Date(current.getFullYear() - delta, current.getMonth(), current.getDate());
+    
+    // Format date as YYYY-MM-DD
+    const formattedDate = minDate.toISOString().split('T')[0];
+    sessionStorage.setItem("date", formattedDate);
+    
+    console.log("Earliest release date:", sessionStorage.getItem("date"));
 }
 
 function getStream() {
-    sessionStorage.setItem("stream", document.querySelector('input[name="stream"]:checked').value);
-    console.log(sessionStorage.getItem("numMovie"));
-    console.log(sessionStorage.getItem("genre"));
-    console.log(sessionStorage.getItem("date"));
-    console.log(sessionStorage.getItem("stream"));
+    const selectedStream = document.querySelector('input[name="stream"]:checked');
+    if (selectedStream) {
+        sessionStorage.setItem("stream", selectedStream.value);
+        console.log("Streaming service selected:", sessionStorage.getItem("stream"));
+    }
 }
   
 function getRating() {
-    //var array = [[],[]];
-    //sessionStorage.setItem("previousMovies", JSON.stringify(array));
-    var empty = [];
+    // Initialize empty array for tracking previously suggested movies
+    const empty = [];
     sessionStorage.setItem("previousMovies", JSON.stringify(empty));
 
-    sessionStorage.setItem("rating", document.querySelector('input[name="rating"]:checked').value);
-    console.log(sessionStorage.getItem("rating"));
+    const selectedRating = document.querySelector('input[name="rating"]:checked');
+    if (selectedRating) {
+        sessionStorage.setItem("rating", selectedRating.value);
+        console.log("Minimum rating selected:", sessionStorage.getItem("rating"));
+    }
 }
 
+/**
+ * Map genre ID to readable genre name
+ */
+function getGenreName(genreId) {
+    const genreMap = {
+        28: "Action",
+        35: "Comedy",
+        18: "Drama",
+        10749: "Romance",
+        9648: "Mystery",
+        14: "Fantasy",
+        27: "Horror",
+        878: "Science Fiction"
+    };
+    
+    return genreMap[genreId] || "Unknown";
+}
 
+/**
+ * Format movie data for display
+ */
+function displayMovie(movie) {
+    try {
+        // Extract movie data
+        const title = movie.title;
+        const rating = movie.vote_average;
+        const releaseDate = movie.release_date;
+        const genreId = movie.genre_ids[0];
+        let overview = movie.overview;
+        
+        // Format overview text (limit length)
+        if (overview && overview.length > 325) {
+            let trimmedOverview = overview.substr(0, 325);
+            // End at a complete sentence
+            trimmedOverview = trimmedOverview.substr(0, Math.min(trimmedOverview.length, trimmedOverview.lastIndexOf("."))) + ".";
+            if (trimmedOverview.length > 50) {
+                overview = trimmedOverview;
+            }
+        }
+        
+        // Create image element for poster
+        const posterPath = movie.poster_path;
+        const posterUrl = "https://image.tmdb.org/t/p/w400" + posterPath;
+        
+        const img = new Image();
+        img.onload = function() {
+            img.style.maxWidth = "100%";
+            img.style.height = "auto";
+            img.style.borderRadius = "var(--border-radius)";
+            img.style.boxShadow = "var(--shadow)";
+            
+            const posterContainer = document.getElementById("suggestion1");
+            posterContainer.innerHTML = '';
+            posterContainer.appendChild(img);
+        };
+        img.onerror = function() {
+            // Handle image loading error
+            document.getElementById("suggestion1").innerHTML = '<div class="poster-placeholder">Image not available</div>';
+        };
+        img.src = posterUrl;
+        
+        // Update page elements with movie info
+        document.getElementById("title").innerText = title;
+        document.getElementById("date").innerText = releaseDate;
+        document.getElementById("rating").innerText = rating;
+        document.getElementById("genre").innerText = getGenreName(parseInt(sessionStorage.getItem("genre"), 10));
+        document.getElementById("overview").innerText = overview || "No overview available.";
+        
+    } catch (err) {
+        console.error("Error displaying movie:", err);
+        showError("There was a problem displaying the movie. Please try again.");
+    }
+}
+
+/**
+ * Show error message to user
+ */
+function showError(message) {
+    alert(message);
+}
+
+/**
+ * Build query options and fetch movies
+ */
 function getChoices() {
-    //options = {};
-    options.page = sessionStorage.pageNumber;
-    console.log(options.page);
-    if (sessionStorage.getItem('language') == 'en') {options["vote_count.gte"] = 300;}
-    else {options["vote_count.gte"] = 0;}
-    options["vote_average.gte"] = parseInt(sessionStorage.getItem('rating'),10);
-    //console.log(options["vote_count.gte"])
-    options.with_original_language = options.language = sessionStorage.getItem('language');
-    //options.primary_release_year = range(1980, 1990, 1); //range of release year
-    options["primary_release_date.gte"] = sessionStorage.getItem('date');
-    //chosenGenres = sessionStorage.getItem("genres");
-    options.with_genres = parseInt(sessionStorage.getItem('genre'),10);             //list of genres
-    //options.with_genres = [10749 || 16 || 12];           //list of genres
-    options.watch_region = "CA";       
-    options.with_watch_providers = parseInt(sessionStorage.getItem('stream'),10);   //list of streaming services (see discord #back end for IDs) 
-    //options.with_watch_providers = [8 || 9];               //list of streaming services (see discord #back end for IDs) 
-    theMovieDb.discover.getMovies(options, successFunction, errorFunction);
-    /*
-    while(true){
-        try{
-            options.page = Math.floor((Math.random() * (10))+1); //chosen page
-            theMovieDb.discover.getMovies(options, successFunction, getChoices);
-            break
-        } catch(err){
-            continue;
+    try {
+        // Get search parameters from session storage
+        options = {};
+        options.page = sessionStorage.pageNumber || 1;
+        
+        // Set language filter and vote count minimum
+        if (sessionStorage.getItem('language') === 'en') {
+            options["vote_count.gte"] = 300;
+        } else {
+            options["vote_count.gte"] = 0;
         }
-    }*/
-}
-/*
-function getInfo(id){
-    theMovieDb.movies.getDetails(id, infoSuccess, errorFunction);
-}
-
-function infoSuccess(info){
-    info = JSON.parse(movies);
-    ratings = info.
-}
-*/
-// "genres" "rate" "streaming" "date"
-//sessionStorage.getItem("genres")
-function successFunction(movies){
-    movies = JSON.parse(movies);
-
-    console.log(movies.page);
-    console.log(sessionStorage.pageNumber);
-
-    length = movies.total_results;
-    console.log(length);
-
-    sessionStorage.pageNumber = Math.floor((Math.random() * (movies.total_pages-1))+1); //chosen page
-
-    movieNumber = Math.floor(Math.random() * (Math.min(20,length-1)));
-    console.log(movieNumber);
-
-    /*while (sessionStorage.pageNumber < 1){
-        sessionStorage.pageNumber = Math.floor((Math.random() * (movies.total_pages))); //chosen page
-    }*/
-    //console.log(page);
-
-    //length = Object.keys(movies).length;
-
-    //prevMovies = JSON.parse(sessionStorage.getItem("previousMovies"));
-
-    /*done = false;
-    count = 0;
-    for (i = 0; i < prevMovies.length; i++){
-        if (prevMovies[i][0] == sessionStorage.pageNumber && prevMovies[i][1] == movieNumber){
-            console.log("repeated");
-            count += 1;
-            sessionStorage.pageNumber = Math.floor((Math.random() * (movies.total_pages-1))+1);
-            movieNumber = Math.floor(Math.random() * (Math.min(20,length-1)));
-            i = 0; 
-            if (prevMovies.length > length || count > 100) done = true;
-            document.location=("suggestions.html")
-        }
-        if (done){
-            document.location=("index.html");
-            alert("Sorry, no more movies found for your criteria! Want to try again?");
-            break;
-        }
-    }*/
-    
-    //console.log(prevMovies.length);
-    //prevMovies.push([sessionStorage.pageNumber, movieNumber]);
-    //console.log(prevMovies);
-    //sessionStorage.setItem("previousMovies", JSON.stringify(prevMovies));
-    
-
-    //movieNumber = Math.floor(Math.random() * (length/1.2));
-    //getInfo(movies.results[movieNumber].id);
-    console.log(movieNumber);
-
-    //console.log(movies);
-    //console.log(movieNumber);
-    //console.log(movies.results[movieNumber]);
-
-    prevMovies = JSON.parse(sessionStorage.getItem("previousMovies"));
-
-    count = 0;
-    do{
-        count += 1;
-        if (prevMovies.length > length-1 || count > 100){
-            document.location=("index.html");
-            alert("Sorry, no more movies found for your criteria! Want to try again?");
-            break;
-        }
-        movieNumber = Math.floor(Math.random() * (Math.min(20,length-1)));
-        console.log("trying");
-        try {rating = movies.results[movieNumber].vote_average;
-        title = movies.results[movieNumber].title;
-        poster = "https://image.tmdb.org/t/p/w400"+movies.results[movieNumber].poster_path;
-        releaseDate = movies.results[movieNumber].release_date;
-        genreID = movies.results[movieNumber].genre_ids[0];
-        overview = movies.results[movieNumber].overview;    }
-        catch(err){
-            document.location=("index.html");
-            alert("Sorry, no movie found for your criteria! Want to try again?")
-        }
-    } while (prevMovies.includes(title));
-
-    prevMovies.push(title);
-    sessionStorage.setItem("previousMovies", JSON.stringify(prevMovies));
-    console.log(prevMovies);
-
-    
-    console.log(overview);
-    if (overview.length > 325){
-        var maxLength = 325; // maximum number of characters to extract
-        //trim the string to the maximum length
-        var trimmedOverview = overview.substr(0, maxLength);
-        //re-trim if we are in the middle of a word
-        trimmedOverview = trimmedOverview.substr(0, Math.min(trimmedOverview.length, trimmedOverview.lastIndexOf(".")))+".";
-        if (trimmedOverview.length > 50) {overview = trimmedOverview}
+        
+        // Set minimum rating
+        options["vote_average.gte"] = parseInt(sessionStorage.getItem('rating'), 10);
+        
+        // Set language
+        options.with_original_language = options.language = sessionStorage.getItem('language');
+        
+        // Set release date range
+        options["primary_release_date.gte"] = sessionStorage.getItem('date');
+        
+        // Set genre
+        options.with_genres = parseInt(sessionStorage.getItem('genre'), 10);
+        
+        // Set streaming service filter
+        options.watch_region = "CA";
+        options.with_watch_providers = parseInt(sessionStorage.getItem('stream'), 10);
+        
+        console.log("Search options:", options);
+        
+        // Call The Movie Database API
+        theMovieDb.discover.getMovies(options, successFunction, errorFunction);
+    } catch (err) {
+        console.error("Error getting movie choices:", err);
+        showError("There was a problem fetching movies. Please try again.");
     }
-    console.log(overview);
+}
 
-    console.log(title+'\n'+poster+'\n'+genreID+'\n'+overview);
-
-    var img = new Image(); 
-    var div = document.getElementById("suggestion1"); 
- 
-    img.onload = function() { 
-    img.height = 500;
-    div.appendChild(img); 
-    }; 
- 
-    img.src = poster;
-    
-    document.getElementById("suggestion1").src = poster;
-    document.getElementById("title").innerText = title;
-    document.getElementById("date").innerText = releaseDate;
-    document.getElementById("rating").innerText = rating;
-    temp = parseInt(sessionStorage.getItem("genre"),10);
-    var genreee;
-    if(temp == 28){
-        genreee = "Action";
-    }else if(temp == 35){
-        genreee = "Comedy";
-    }else if(temp == 18){
-        genreee = "Drama";
-    }else if(temp == 10749){
-        genreee = "Romance";
-    }else if(temp == 9648){
-        genreee = "Mystery";
-    }else if(temp == 14){
-        genreee = "Fantasy";
-    }else if(temp == 27){
-        genreee = "Horror";
-    }else{
-        genreee = "Science Fiction";
+/**
+ * Handle successful API response
+ */
+function successFunction(movies) {
+    try {
+        movies = JSON.parse(movies);
+        
+        console.log(`Found ${movies.total_results} movies across ${movies.total_pages} pages`);
+        
+        // If no movies found, show error
+        if (movies.total_results === 0) {
+            document.location = "./index.html";
+            alert("Sorry, no movies found for your criteria! Want to try again?");
+            return;
+        }
+        
+        // Choose a random page
+        sessionStorage.pageNumber = Math.floor((Math.random() * (movies.total_pages - 1)) + 1);
+        
+        // Choose a random movie from the results
+        const movieCount = Math.min(20, movies.total_results - 1);
+        let movieNumber = Math.floor(Math.random() * movieCount);
+        
+        // Get previously shown movies
+        let prevMovies = JSON.parse(sessionStorage.getItem("previousMovies") || "[]");
+        
+        // Check if we've shown too many movies already
+        const maxAttempts = 100;
+        let count = 0;
+        let title;
+        
+        // Try to find a movie we haven't shown yet
+        do {
+            count++;
+            if (prevMovies.length > movies.total_results - 1 || count > maxAttempts) {
+                document.location = "./index.html";
+                alert("Sorry, no more movies found for your criteria! Want to try again?");
+                return;
+            }
+            
+            movieNumber = Math.floor(Math.random() * movieCount);
+            
+            try {
+                title = movies.results[movieNumber].title;
+            } catch (err) {
+                document.location = "./index.html";
+                alert("Sorry, no movie found for your criteria! Want to try again?");
+                return;
+            }
+        } while (prevMovies.includes(title));
+        
+        // Add this movie to previously shown list
+        prevMovies.push(title);
+        sessionStorage.setItem("previousMovies", JSON.stringify(prevMovies));
+        
+        // Display the selected movie
+        displayMovie(movies.results[movieNumber]);
+        
+    } catch (err) {
+        console.error("Error processing movie results:", err);
+        showError("There was a problem processing the results. Please try again.");
     }
-    document.getElementById("genre").innerText = genreee;
-    document.getElementById("overview").innerText = overview;
-
-    //alert(result);
-    //console.log(result);
 }
 
-function errorFunction(result){
-    console.log(options.page);
-    alert("error");
+/**
+ * Handle API errors
+ */
+function errorFunction(error) {
+    console.error("API Error:", error);
+    showError("There was a problem connecting to the movie database. Please try again later.");
 }
-/*if (releaseYear){
-    api_url += ""
-}
-
-
-
-theMovieDb.discover.getMovie(options, successCallback, errorCallback);
-*/

@@ -1,42 +1,74 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Recommendation - Choose Me a Movie</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles/Graphics.css">
+    <script src="../Back-end/themoviedb.js"></script>
+    <script src="../Back-end/fetch.js" defer></script>
+</head>
 
-<html>
-    <head>
-        <meta charset="utf-8">
-        <link rel="stylesheet" href="./styles/Graphics.css">
-        <link href='https://fonts.googleapis.com/css?family=Oswald' rel='stylesheet' type='text/css'>
-        <script src="../Back-end/fetch.js"></script>
-        <script type="text/javascript" src="../Back-end/themoviedb.js"></script>
-        <title id = "Suggestions">Suggestions</title>
-    </head> 
-    <body onload="getChoices()">
-
-        <h1> Movie Has Been Chosen </h1>
-
-        <div style="margin-top: -50px;" class="suggestions" id="results">
-            <div class="poster" id="suggestion1"></div>
-                
-            <div class="suggestionText" id="suggestionText">
-                <label class="left" id="title1">Title: </label>
-                <label class="left" id="title">Pride and Prejudice </label> <br>
-                <label class="left" id="date1">Release date: </label>
-                <label class="left" id="date">Sept 16 2005 </label> <br>
-                <label class="left" id="genre1">Genre: </label>
-                <label class="left" id="genre">Romance </label><br>
-                <label class="left" id="rating1">Rating: </label>
-                <label class="left" id="rating">10 </label>
-                <label class="left" id="rating2"> / 10</label><br>
-                <label class="left" id="overview1">Overview: </label>
-                <label class="left" id="overview"></label>
+<body>
+    <div class="container">
+        <header>
+            <h1>Choose Me a Movie</h1>
+            <p class="subtitle">We found a movie for you!</p>
+        </header>
+        
+        <main>
+            <div class="card">
+                <div class="movie-result" id="results">
+                    <div class="poster" id="suggestion1">
+                        <!-- Poster image will be dynamically inserted here -->
+                    </div>
+                    
+                    <div class="movie-details">
+                        <h2 class="movie-title" id="title">Loading...</h2>
+                        
+                        <div class="movie-info">
+                            <div class="info-item">
+                                <span class="info-label">Released:</span>
+                                <span id="date">-</span>
+                            </div>
+                            
+                            <div class="info-item">
+                                <span class="info-label">Genre:</span>
+                                <span id="genre">-</span>
+                            </div>
+                            
+                            <div class="info-item">
+                                <span class="info-label">Rating:</span>
+                                <span id="rating">-</span><span>/10</span>
+                            </div>
+                        </div>
+                        
+                        <div class="movie-overview">
+                            <h3>Overview</h3>
+                            <p id="overview">Loading movie information...</p>
+                        </div>
+                    </div>
                 </div>
-            
-
-        </div>
-        <button id="random" type="submit" onclick="document.location='./suggestions.html'">Generate a new result</button>
-        <button id="previous1" type="submit" onclick="document.location='./hquestion4.html'">Previous</button>
-        <button id="return" type="submit" onclick="document.location='./index.html'">Return to start</button>
+                
+                <div class="action-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="document.location='./hquestion4.html'">Previous</button>
+                    <button type="button" class="btn" onclick="document.location='./suggestions.html'">New Choice</button>
+                    <button type="button" class="btn btn-accent" onclick="document.location='./index.html'">Start Over</button>
+                </div>
+            </div>
+        </main>
         
-    </body>
-        
+        <footer>
+            <p><a href="https://www.alext.dev/" target="_blank">Made by Alex Turianskyj</a> | <a href="https://www.themoviedb.org/" target="_blank">Powered by TMDB</a></p>
+        </footer>
+    </div>
     
+    <script>
+        // Initialize page on load
+        window.onload = function() {
+            getChoices();
+        };
+    </script>
+</body>
 </html>

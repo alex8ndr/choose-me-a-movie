@@ -1,33 +1,68 @@
 <!DOCTYPE html>
-<script type="text/javascript" src="../Back-end/themoviedb.js"></script>
-<script type="text/javascript" src="../Back-end/fetch.js"></script>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose a Streaming Service - Choose Me a Movie</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles/Graphics.css">
+    <script src="../Back-end/fetch.js" defer></script>
+    <script type="text/javascript" src="../Back-end/themoviedb.js"></script>
+</head>
 
-<html>
-    <head>
-        <meta charset="utf-8">
-        <script src="../Back-end/fetch.js"></script>
-        <link rel="stylesheet" href="./styles/Graphics.css">
-        <link href='https://fonts.googleapis.com/css?family=Oswald' rel='stylesheet' type='text/css'>
-        <title id = "Hard-Coded Question 3">Question 3</title>
-    </head> 
-    <body>
-        <script src="../Back-end/fetch.js"></script>
-
-        <h1> Choose Me a Movie </h1>
+<body>
+    <div class="container">
+        <header>
+            <h1>Choose Me a Movie</h1>
+            <p class="subtitle">Stop scrolling. Start watching.</p>
+        </header>
         
-        <div class="question3" id="question">
-                <label class="center">Which streaming service do you want to use? </label> <br>
-                <form class="subcheckboxes" id="subcheckboxes">
-                    <label class="left"><input type="radio" name="stream" id="netflix" value="8">Netflix</label><br>
-                    <label class="left"><input type="radio" name="stream" id="amazon" value="119">Amazon Prime</label><br>
-                    <label class="left"><input type="radio" name="stream" id="apple" value="350">Apple TV</label><br>
-                    <label class="left"><input type="radio" name="stream" id="disney" value="337">Disney Plus</label><br>
-                    <label class="left"><input type="radio" name="stream" id="crave" value="230">Crave</label>
+        <main>
+            <div class="card">
+                <form class="question-form" id="streamForm" onsubmit="handleSubmit(event)">
+                    <h2>Which streaming service do you want to use?</h2>
+                    <div class="options">
+                        <label class="option-label">
+                            <input type="radio" name="stream" id="netflix" value="8" required>
+                            <span class="option-text">Netflix</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="stream" id="amazon" value="119">
+                            <span class="option-text">Amazon Prime</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="stream" id="apple" value="350">
+                            <span class="option-text">Apple TV</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="stream" id="disney" value="337">
+                            <span class="option-text">Disney Plus</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="stream" id="crave" value="230">
+                            <span class="option-text">Crave</span>
+                        </label>
+                    </div>
+                    
+                    <div class="navigation">
+                        <button type="button" class="btn btn-secondary" onclick="window.location.href='./hquestion2.html'">Previous</button>
+                        <button type="submit" class="btn">Next</button>
+                    </div>
                 </form>
-            
-        </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p><a href="https://www.alext.dev/" target="_blank">Made by Alex Turianskyj</a> | <a href="https://www.themoviedb.org/" target="_blank">Powered by TMDB</a></p>
+        </footer>
+    </div>
 
-        <button id="previous" type="submit" onclick="document.location='./hquestion2.html'">Previous</button>
-        <button id="next" type="submit" onclick="getStream();document.location='./hquestion4.html'">Next</button>
-    
+    <script>
+        function handleSubmit(event) {
+            event.preventDefault();
+            getStream();
+            window.location.href = './hquestion4.html';
+        }
+    </script>
+</body>
 </html>

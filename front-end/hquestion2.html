@@ -1,30 +1,71 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose a Release Period - Choose Me a Movie</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles/Graphics.css">
+    <script src="../Back-end/fetch.js" defer></script>
+</head>
 
-<html>
-    <head>
-        <meta charset="utf-8">
-        <link rel="stylesheet" href="./styles/Graphics.css">
-        <link href='https://fonts.googleapis.com/css?family=Oswald' rel='stylesheet' type='text/css'>
-        <title id = "Hard-Coded Question 2">Question 2</title>
-    </head> 
-    <body>
-        <script src="../Back-end/fetch.js"></script>
-
-        <h1> Choose Me a Movie </h1>
+<body>
+    <div class="container">
+        <header>
+            <h1>Choose Me a Movie</h1>
+            <p class="subtitle">Stop scrolling. Start watching.</p>
+        </header>
         
-        <div class="question2" id="question">
-            <label class="center">How recent should the movie be? </label> <br>
-            <form class="checkboxes" id="checkboxes">
-                <label class="left"><input type="radio" name="date" id="1" value="1">Last year</label><br>
-                <label class="left"><input type="radio" name="date" id="5" value="5">Last 5 years</label><br>
-                <label class="left"><input type="radio" name="date" id="10" value="10">Last 10 years</label><br>
-                <label class="left"><input type="radio" name="date" id="20" value="20">Last 20 years</label><br>
-                <label class="left"><input type="radio" name="date" id="40" value="40">Last 40 years</label><br>
-                <label class="left"><input type="radio" name="date" id="100" value="100">Don't care</label>
-            </form>
-        </div>
-      
-        <button id="previous" type="submit" onclick="document.location='./hquestion1.html'">Previous</button>
-        <button id="next" type="submit" onclick="date();document.location='./hquestion3.html'">Next</button>
-    
+        <main>
+            <div class="card">
+                <form class="question-form" id="dateForm" onsubmit="handleSubmit(event)">
+                    <h2>How recent should the movie be?</h2>
+                    <div class="options">
+                        <label class="option-label">
+                            <input type="radio" name="date" id="1" value="1" required>
+                            <span class="option-text">Last year</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="date" id="5" value="5">
+                            <span class="option-text">Last 5 years</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="date" id="10" value="10">
+                            <span class="option-text">Last 10 years</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="date" id="20" value="20">
+                            <span class="option-text">Last 20 years</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="date" id="40" value="40">
+                            <span class="option-text">Last 40 years</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="date" id="100" value="100">
+                            <span class="option-text">Don't care</span>
+                        </label>
+                    </div>
+                    
+                    <div class="navigation">
+                        <button type="button" class="btn btn-secondary" onclick="window.location.href='./hquestion1.html'">Previous</button>
+                        <button type="submit" class="btn">Next</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+        
+        <footer>
+            <p><a href="https://www.alext.dev/" target="_blank">Made by Alex Turianskyj</a> | <a href="https://www.themoviedb.org/" target="_blank">Powered by TMDB</a></p>
+        </footer>
+    </div>
+
+    <script>
+        function handleSubmit(event) {
+            event.preventDefault();
+            date();
+            window.location.href = './hquestion3.html';
+        }
+    </script>
+</body>
 </html>

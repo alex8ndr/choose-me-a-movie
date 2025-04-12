@@ -1,29 +1,79 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose a Genre - Choose Me a Movie</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles/Graphics.css">
+    <script src="../Back-end/fetch.js" defer></script>
+</head>
 
-<html>
-    <head>
-        <meta charset="utf-8">
-        <link rel="stylesheet" href="./styles/Graphics.css">
-        <link href='https://fonts.googleapis.com/css?family=Oswald' rel='stylesheet' type='text/css'>
-        <script src="../Back-end/fetch.js"></script>
-        <title id = "Hard-Coded Question 1">Question 1</title>
-    </head> 
-    <body>
-        <h1> Choose Me a Movie </h1>
+<body>
+    <div class="container">
+        <header>
+            <h1>Choose Me a Movie</h1>
+            <p class="subtitle">Stop scrolling. Start watching.</p>
+        </header>
         
-        <div class="question1" id="question">
-            <label class="center">Which genre do you want to watch? </label> <br>
-            <form class="checkboxes" id="checkboxes">
-                <label class="left"><input name = "genre" id="action" type="radio" value = "28">Action &#128299</label><br>
-                <label class="left"><input name = "genre" id="comedy" type="radio" value = "35">Comedy &#129315</label><br>
-                <label class="left"><input name = "genre" id="drama" type="radio" value = "18">Drama &#x1F622</label><br>
-                <label class="left"><input name = "genre" id="romance" type="radio" value = "10749">Romance &#128525</label><br>
-                <label class="left"><input name = "genre" id="mystery" type="radio" value = "9648">Mystery &#129488</label><br>
-                <label class="left"><input name = "genre" id="fantasy" type="radio" value = "14">Fantasy &#129497</label><br>
-                <label class="left"><input name = "genre" id="horror" type="radio" value = "27">Horror &#128128</label><br>
-                <label class="left"><input name = "genre" id="scifi" type="radio" value = "878">Science Fiction &#128760</label>
-            </form>
-     </div>
-     <button id="previous" type="submit" onclick="document.location='./index.html'">Previous</button>
-     <button id="next" type="submit" onclick="genre();document.location='./hquestion2.html'">Next</button>
+        <main>
+            <div class="card">
+                <form class="question-form" id="genreForm" onsubmit="handleSubmit(event)">
+                    <h2>Which genre do you want to watch?</h2>
+                    <div class="options">
+                        <label class="option-label">
+                            <input name="genre" id="action" type="radio" value="28" required>
+                            <span class="option-text">Action 🔫</span>
+                        </label>
+                        <label class="option-label">
+                            <input name="genre" id="comedy" type="radio" value="35">
+                            <span class="option-text">Comedy 🤣</span>
+                        </label>
+                        <label class="option-label">
+                            <input name="genre" id="drama" type="radio" value="18">
+                            <span class="option-text">Drama 😢</span>
+                        </label>
+                        <label class="option-label">
+                            <input name="genre" id="romance" type="radio" value="10749">
+                            <span class="option-text">Romance 😍</span>
+                        </label>
+                        <label class="option-label">
+                            <input name="genre" id="mystery" type="radio" value="9648">
+                            <span class="option-text">Mystery 🤔</span>
+                        </label>
+                        <label class="option-label">
+                            <input name="genre" id="fantasy" type="radio" value="14">
+                            <span class="option-text">Fantasy 🧙</span>
+                        </label>
+                        <label class="option-label">
+                            <input name="genre" id="horror" type="radio" value="27">
+                            <span class="option-text">Horror 💀</span>
+                        </label>
+                        <label class="option-label">
+                            <input name="genre" id="scifi" type="radio" value="878">
+                            <span class="option-text">Science Fiction 🪐</span>
+                        </label>
+                    </div>
+                    
+                    <div class="navigation">
+                        <button type="button" class="btn btn-secondary" onclick="window.location.href='./index.html'">Previous</button>
+                        <button type="submit" class="btn">Next</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+        
+        <footer>
+            <p><a href="https://www.alext.dev/" target="_blank">Made by Alex Turianskyj</a> | <a href="https://www.themoviedb.org/" target="_blank">Powered by TMDB</a></p>
+        </footer>
+    </div>
+
+    <script>
+        function handleSubmit(event) {
+            event.preventDefault();
+            genre();
+            window.location.href = './hquestion2.html';
+        }
+    </script>
+</body>
 </html>
