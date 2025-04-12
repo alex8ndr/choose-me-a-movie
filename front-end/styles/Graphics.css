@@ -126,6 +126,14 @@ input[type="radio"] {
   cursor: pointer;
 }
 
+/* Update checkbox inputs to match radio style */
+input[type="checkbox"] {
+  margin-right: 0.8rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  cursor: pointer;
+}
+
 .option-text {
   font-size: 1rem;
 }
@@ -171,11 +179,24 @@ input[type="radio"] {
   background: linear-gradient(to right, var(--accent-color), #ffb347);
 }
 
+/* Disabled button state */
+.btn-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Single button (like Next on first page) should be right-aligned */
+form .navigation:only-child {
+  justify-content: flex-end;
+}
+
 /* Results page styling */
 .movie-result {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.5rem;
+  animation: fadeIn 0.3s ease-in;
 }
 
 @media (min-width: 768px) {
@@ -222,7 +243,12 @@ input[type="radio"] {
 
 .info-label {
   font-weight: 600;
-  min-width: 100px;
+  min-width: 120px;  /* Increased to accommodate "Streaming on:" label */
+}
+
+#streaming {
+  color: var(--primary-color);
+  font-weight: 500;
 }
 
 .movie-overview {
@@ -286,6 +312,52 @@ footer a {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--primary-color);
+}
+
+/* Loading states */
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: var(--primary-color);
+  animation: spin 1s ease-in-out infinite;
+  margin: 2rem auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.poster-placeholder {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: var(--border-radius);
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-light);
+  text-align: center;
+  padding: 1rem;
+}
+
+.no-results {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: var(--border-radius);
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-light);
+  text-align: center;
+  padding: 1rem;
+  font-size: 1.2rem;
+}
+
+/* Fade in animation for content */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 

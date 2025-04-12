@@ -3,7 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Choose a Streaming Service - Choose Me a Movie</title>
+    <title>Choose Streaming Services - Choose Me a Movie</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./styles/Graphics.css">
     <script src="../Back-end/fetch.js" defer></script>
@@ -20,27 +21,37 @@
         <main>
             <div class="card">
                 <form class="question-form" id="streamForm" onsubmit="handleSubmit(event)">
-                    <h2>Which streaming service do you want to use?</h2>
+                    <h2>Which streaming services do you have?</h2>
                     <div class="options">
                         <label class="option-label">
-                            <input type="radio" name="stream" id="netflix" value="8" required>
+                            <input type="checkbox" name="stream" value="8">
                             <span class="option-text">Netflix</span>
                         </label>
                         <label class="option-label">
-                            <input type="radio" name="stream" id="amazon" value="119">
+                            <input type="checkbox" name="stream" value="119">
                             <span class="option-text">Amazon Prime</span>
                         </label>
                         <label class="option-label">
-                            <input type="radio" name="stream" id="apple" value="350">
-                            <span class="option-text">Apple TV</span>
+                            <input type="checkbox" name="stream" value="350">
+                            <span class="option-text">Apple TV+</span>
                         </label>
                         <label class="option-label">
-                            <input type="radio" name="stream" id="disney" value="337">
-                            <span class="option-text">Disney Plus</span>
+                            <input type="checkbox" name="stream" value="337">
+                            <span class="option-text">Disney+</span>
                         </label>
                         <label class="option-label">
-                            <input type="radio" name="stream" id="crave" value="230">
+                            <input type="checkbox" name="stream" value="230">
                             <span class="option-text">Crave</span>
+                        </label>
+                        <!--
+                        <label class="option-label">
+                            <input type="checkbox" name="stream" value="384">
+                            <span class="option-text">Max (formerly HBO Max)</span>
+                        </label>
+                        -->
+                        <label class="option-label">
+                            <input type="checkbox" name="stream" value="531">
+                            <span class="option-text">Paramount+</span>
                         </label>
                     </div>
                     
@@ -60,7 +71,16 @@
     <script>
         function handleSubmit(event) {
             event.preventDefault();
-            getStream();
+            const selectedServices = Array.from(document.querySelectorAll('input[name="stream"]:checked'))
+                .map(cb => cb.value)
+                .join('|');
+            
+            if (!selectedServices) {
+                alert("Please select at least one streaming service");
+                return;
+            }
+            
+            sessionStorage.setItem("stream", selectedServices);
             window.location.href = './hquestion4.html';
         }
     </script>
