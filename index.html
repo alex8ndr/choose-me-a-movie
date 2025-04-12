@@ -1,2 +1,332 @@
-<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
-<meta http-equiv="refresh" content="0; url=./front-end/index.html">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Me a Movie</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./assets/styles/Graphics.css">
+    <script src="./Back-end/themoviedb.js"></script>
+    <script src="./Back-end/fetch.js" defer></script>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Choose Me a Movie</h1>
+            <p class="subtitle" id="pageSubtitle">Stop scrolling. Start watching.</p>
+        </header>
+        
+        <main>
+            <div class="card">
+                <!-- Content will be dynamically injected here -->
+                <div id="pageContent"></div>
+            </div>
+        </main>
+        
+        <footer>
+            <p><a href="https://www.alext.dev/" target="_blank">Made by Alex Turianskyj</a> | <a href="https://www.themoviedb.org/" target="_blank">Powered by TMDB</a></p>
+        </footer>
+    </div>
+
+    <script>
+        // Template content for each page
+        const pages = {
+            language: `
+                <form class="question-form" id="questionForm" onsubmit="handleLanguageSubmit(event)">
+                    <h2>In which language do you want your movie to be?</h2>
+                    <div class="options">
+                        <label class="option-label">
+                            <input id="1" name="language" type="radio" value="en" required>
+                            <span class="option-text">English</span>
+                        </label>
+                        <label class="option-label">
+                            <input id="2" name="language" type="radio" value="fr">
+                            <span class="option-text">French</span>
+                        </label>
+                    </div>
+                    <div class="navigation">
+                        <button type="submit" class="btn">Next</button>
+                    </div>
+                </form>
+            `,
+            genre: `
+                <form class="question-form" id="genreForm" onsubmit="handleGenreSubmit(event)">
+                    <h2>Which genre do you want to watch?</h2>
+                    <div class="options">
+                        <label class="option-label">
+                            <input name="genre" id="action" type="radio" value="28" required>
+                            <span class="option-text">Action 🔫</span>
+                        </label>
+                        <label class="option-label">
+                            <input name="genre" id="comedy" type="radio" value="35">
+                            <span class="option-text">Comedy 🤣</span>
+                        </label>
+                        <label class="option-label">
+                            <input name="genre" id="drama" type="radio" value="18">
+                            <span class="option-text">Drama 😢</span>
+                        </label>
+                        <label class="option-label">
+                            <input name="genre" id="romance" type="radio" value="10749">
+                            <span class="option-text">Romance 😍</span>
+                        </label>
+                        <label class="option-label">
+                            <input name="genre" id="mystery" type="radio" value="9648">
+                            <span class="option-text">Mystery 🤔</span>
+                        </label>
+                        <label class="option-label">
+                            <input name="genre" id="fantasy" type="radio" value="14">
+                            <span class="option-text">Fantasy 🧙</span>
+                        </label>
+                        <label class="option-label">
+                            <input name="genre" id="horror" type="radio" value="27">
+                            <span class="option-text">Horror 💀</span>
+                        </label>
+                        <label class="option-label">
+                            <input name="genre" id="scifi" type="radio" value="878">
+                            <span class="option-text">Science Fiction 🪐</span>
+                        </label>
+                    </div>
+                    <div class="navigation">
+                        <button type="button" class="btn btn-secondary" onclick="navigateTo('language')">Previous</button>
+                        <button type="submit" class="btn">Next</button>
+                    </div>
+                </form>
+            `,
+            date: `
+                <form class="question-form" id="dateForm" onsubmit="handleDateSubmit(event)">
+                    <h2>How recent should the movie be?</h2>
+                    <div class="options">
+                        <label class="option-label">
+                            <input type="radio" name="date" id="1" value="1" required>
+                            <span class="option-text">Last year</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="date" id="5" value="5">
+                            <span class="option-text">Last 5 years</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="date" id="10" value="10">
+                            <span class="option-text">Last 10 years</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="date" id="20" value="20">
+                            <span class="option-text">Last 20 years</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="date" id="40" value="40">
+                            <span class="option-text">Last 40 years</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="date" id="100" value="100">
+                            <span class="option-text">Don't care</span>
+                        </label>
+                    </div>
+                    <div class="navigation">
+                        <button type="button" class="btn btn-secondary" onclick="navigateTo('genre')">Previous</button>
+                        <button type="submit" class="btn">Next</button>
+                    </div>
+                </form>
+            `,
+            streaming: `
+                <form class="question-form" id="streamForm" onsubmit="handleStreamingSubmit(event)">
+                    <h2>Which streaming services do you have?</h2>
+                    <div class="options">
+                        <label class="option-label">
+                            <input type="checkbox" name="stream" value="8">
+                            <span class="option-text">Netflix</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="checkbox" name="stream" value="119">
+                            <span class="option-text">Amazon Prime</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="checkbox" name="stream" value="350">
+                            <span class="option-text">Apple TV+</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="checkbox" name="stream" value="337">
+                            <span class="option-text">Disney+</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="checkbox" name="stream" value="230">
+                            <span class="option-text">Crave</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="checkbox" name="stream" value="531">
+                            <span class="option-text">Paramount+</span>
+                        </label>
+                    </div>
+                    <div class="navigation">
+                        <button type="button" class="btn btn-secondary" onclick="navigateTo('date')">Previous</button>
+                        <button type="submit" class="btn">Next</button>
+                    </div>
+                </form>
+            `,
+            rating: `
+                <form class="question-form" id="ratingForm" onsubmit="handleRatingSubmit(event)">
+                    <h2>How high a user score should the movie have on TMDB?</h2>
+                    <div class="options">
+                        <label class="option-label">
+                            <input name="rating" id="80" type="radio" value="8" required>
+                            <span class="option-text">80% +</span>
+                        </label>
+                        <label class="option-label">
+                            <input name="rating" id="70" type="radio" value="7">
+                            <span class="option-text">70% +</span>
+                        </label>
+                        <label class="option-label">
+                            <input name="rating" id="60" type="radio" value="6">
+                            <span class="option-text">60% +</span>
+                        </label>
+                        <label class="option-label">
+                            <input name="rating" id="50" type="radio" value="5">
+                            <span class="option-text">50% +</span>
+                        </label>
+                        <label class="option-label">
+                            <input name="rating" id="20" type="radio" value="2">
+                            <span class="option-text">Don't care</span>
+                        </label>
+                    </div>
+                    <div class="navigation">
+                        <button type="button" class="btn btn-secondary" onclick="navigateTo('streaming')">Previous</button>
+                        <button type="submit" class="btn">Next</button>
+                    </div>
+                </form>
+            `,
+            suggestions: `
+                <div class="movie-result" id="results">
+                    <div class="poster" id="suggestion1">
+                        <!-- Poster image will be dynamically inserted here -->
+                    </div>
+                    
+                    <div class="movie-details">
+                        <h2 class="movie-title" id="title">Loading...</h2>
+                        
+                        <div class="movie-info">
+                            <div class="info-item">
+                                <span class="info-label">Released:</span>
+                                <span id="date">-</span>
+                            </div>
+                            
+                            <div class="info-item">
+                                <span class="info-label">Genre:</span>
+                                <span id="genre">-</span>
+                            </div>
+                            
+                            <div class="info-item">
+                                <span class="info-label">Rating:</span>
+                                <span id="rating">-</span><span>/10</span>
+                            </div>
+                            
+                            <div class="info-item">
+                                <span class="info-label">Streaming on:</span>
+                                <span id="streaming">Loading...</span>
+                            </div>
+                        </div>
+                        
+                        <div class="movie-overview">
+                            <h3>Overview</h3>
+                            <p id="overview">Loading movie information...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="navigateTo('rating')">Previous</button>
+                    <button type="button" class="btn" onclick="navigateTo('suggestions')">New Choice</button>
+                    <button type="button" class="btn btn-accent" onclick="navigateTo('language')">Start Over</button>
+                </div>
+            `
+        };
+
+        // Navigation functions
+        function navigateTo(page) {
+            const isLocal = window.location.protocol === 'file:';
+            if (isLocal) {
+                // For local development, just update the state without pushing to history
+                renderPage(page);
+            } else {
+                // For hosted environment, use history API
+                window.history.pushState({ page }, '', '/');
+                renderPage(page);
+            }
+        }
+
+        function renderPage(page) {
+            const content = document.getElementById('pageContent');
+            const subtitle = document.getElementById('pageSubtitle');
+            
+            if (!pages[page]) {
+                // Default to language page if invalid page
+                page = 'language';
+            }
+            
+            content.innerHTML = pages[page];
+            
+            if (page === 'suggestions') {
+                subtitle.textContent = 'We found a movie for you!';
+                getChoices();
+            } else {
+                subtitle.textContent = 'Stop scrolling. Start watching.';
+            }
+        }
+
+        // Form submission handlers
+        function handleLanguageSubmit(event) {
+            event.preventDefault();
+            language();
+            navigateTo('genre');
+        }
+
+        function handleGenreSubmit(event) {
+            event.preventDefault();
+            genre();
+            navigateTo('date');
+        }
+
+        function handleDateSubmit(event) {
+            event.preventDefault();
+            date();
+            navigateTo('streaming');
+        }
+
+        function handleStreamingSubmit(event) {
+            event.preventDefault();
+            const selectedServices = Array.from(document.querySelectorAll('input[name="stream"]:checked'))
+                .map(cb => cb.value)
+                .join('|');
+            
+            if (!selectedServices) {
+                alert("Please select at least one streaming service");
+                return;
+            }
+            
+            sessionStorage.setItem("stream", selectedServices);
+            navigateTo('rating');
+        }
+
+        function handleRatingSubmit(event) {
+            event.preventDefault();
+            getRating();
+            navigateTo('suggestions');
+        }
+
+        // Initialize the app
+        window.addEventListener('popstate', (event) => {
+            const page = event.state?.page || 'language';
+            renderPage(page);
+        });
+
+        // Start with language page
+        const isLocal = window.location.protocol === 'file:';
+        if (isLocal) {
+            renderPage('language');
+        } else {
+            window.history.replaceState({ page: 'language' }, '', '/');
+            renderPage('language');
+        }
+    </script>
+</body>
+</html>
