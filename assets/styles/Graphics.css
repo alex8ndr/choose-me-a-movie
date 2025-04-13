@@ -61,6 +61,12 @@ h1 {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  transition: var(--transition);
+}
+
+h1:hover {
+  opacity: 0.8;
+  transform: translateY(-1px);
 }
 
 .subtitle {
@@ -146,6 +152,12 @@ input[type="checkbox"] {
   gap: 0.5rem;
 }
 
+/* Single button (like Next on first page) should be right-aligned */
+.navigation:only-child,
+form .navigation:not(:has(button:nth-child(2))) {
+  justify-content: flex-end;
+}
+
 .btn {
   display: inline-block;
   padding: 0.6rem 1.5rem;
@@ -184,11 +196,6 @@ input[type="checkbox"] {
   opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;
-}
-
-/* Single button (like Next on first page) should be right-aligned */
-form .navigation:only-child {
-  justify-content: flex-end;
 }
 
 /* Results page styling */
@@ -293,6 +300,11 @@ footer a {
   
   .btn {
     width: 100%;
+  }
+
+  h1 {
+    font-size: 2rem;
+    line-height: 1.2;
   }
 }
 
