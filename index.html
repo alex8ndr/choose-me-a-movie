@@ -14,14 +14,15 @@
 <body>
     <div class="container">
         <header>
-            <h1 onclick="navigateTo('language')" style="cursor: pointer">Choose Me a Movie</h1>
+            <h1 onclick="resetApp()" style="cursor: pointer">Choose Me a Movie</h1>
             <p class="subtitle" id="pageSubtitle">Stop scrolling. Start watching.</p>
         </header>
         
         <main>
             <div class="card">
-                <!-- Content will be dynamically injected here -->
-                <div id="pageContent"></div>
+                <div id="wizard-container" class="cards-container">
+                    <!-- Questions will be dynamically added here -->
+                </div>
             </div>
         </main>
         
@@ -31,302 +32,634 @@
     </div>
 
     <script>
-        // Template content for each page
-        const pages = {
-            language: `
-                <form class="question-form" id="questionForm" onsubmit="handleLanguageSubmit(event)">
-                    <h2>In which language do you want your movie to be?</h2>
-                    <div class="options">
-                        <label class="option-label">
-                            <input id="1" name="language" type="radio" value="en" required>
-                            <span class="option-text">English</span>
-                        </label>
-                        <label class="option-label">
-                            <input id="2" name="language" type="radio" value="fr">
-                            <span class="option-text">French</span>
-                        </label>
-                    </div>
-                    <div class="navigation">
-                        <button type="submit" class="btn">Next</button>
-                    </div>
-                </form>
-            `,
-            genre: `
-                <form class="question-form" id="genreForm" onsubmit="handleGenreSubmit(event)">
-                    <h2>Which genre do you want to watch?</h2>
-                    <div class="options">
-                        <label class="option-label">
-                            <input name="genre" id="action" type="radio" value="28" required>
-                            <span class="option-text">Action 🔫</span>
-                        </label>
-                        <label class="option-label">
-                            <input name="genre" id="comedy" type="radio" value="35">
-                            <span class="option-text">Comedy 🤣</span>
-                        </label>
-                        <label class="option-label">
-                            <input name="genre" id="drama" type="radio" value="18">
-                            <span class="option-text">Drama 😢</span>
-                        </label>
-                        <label class="option-label">
-                            <input name="genre" id="romance" type="radio" value="10749">
-                            <span class="option-text">Romance 😍</span>
-                        </label>
-                        <label class="option-label">
-                            <input name="genre" id="mystery" type="radio" value="9648">
-                            <span class="option-text">Mystery 🤔</span>
-                        </label>
-                        <label class="option-label">
-                            <input name="genre" id="fantasy" type="radio" value="14">
-                            <span class="option-text">Fantasy 🧙</span>
-                        </label>
-                        <label class="option-label">
-                            <input name="genre" id="horror" type="radio" value="27">
-                            <span class="option-text">Horror 💀</span>
-                        </label>
-                        <label class="option-label">
-                            <input name="genre" id="scifi" type="radio" value="878">
-                            <span class="option-text">Science Fiction 🪐</span>
-                        </label>
-                    </div>
-                    <div class="navigation">
-                        <button type="button" class="btn btn-secondary" onclick="navigateTo('language')">Previous</button>
-                        <button type="submit" class="btn">Next</button>
-                    </div>
-                </form>
-            `,
-            date: `
-                <form class="question-form" id="dateForm" onsubmit="handleDateSubmit(event)">
-                    <h2>How recent should the movie be?</h2>
-                    <div class="options">
-                        <label class="option-label">
-                            <input type="radio" name="date" id="1" value="1" required>
-                            <span class="option-text">Last year</span>
-                        </label>
-                        <label class="option-label">
-                            <input type="radio" name="date" id="5" value="5">
-                            <span class="option-text">Last 5 years</span>
-                        </label>
-                        <label class="option-label">
-                            <input type="radio" name="date" id="10" value="10">
-                            <span class="option-text">Last 10 years</span>
-                        </label>
-                        <label class="option-label">
-                            <input type="radio" name="date" id="20" value="20">
-                            <span class="option-text">Last 20 years</span>
-                        </label>
-                        <label class="option-label">
-                            <input type="radio" name="date" id="40" value="40">
-                            <span class="option-text">Last 40 years</span>
-                        </label>
-                        <label class="option-label">
-                            <input type="radio" name="date" id="100" value="100">
-                            <span class="option-text">Don't care</span>
-                        </label>
-                    </div>
-                    <div class="navigation">
-                        <button type="button" class="btn btn-secondary" onclick="navigateTo('genre')">Previous</button>
-                        <button type="submit" class="btn">Next</button>
-                    </div>
-                </form>
-            `,
-            streaming: `
-                <form class="question-form" id="streamForm" onsubmit="handleStreamingSubmit(event)">
-                    <h2>Which streaming services do you have?</h2>
-                    <div class="options">
-                        <label class="option-label">
-                            <input type="checkbox" name="stream" value="8">
-                            <span class="option-text">Netflix</span>
-                        </label>
-                        <label class="option-label">
-                            <input type="checkbox" name="stream" value="119">
-                            <span class="option-text">Amazon Prime</span>
-                        </label>
-                        <label class="option-label">
-                            <input type="checkbox" name="stream" value="350">
-                            <span class="option-text">Apple TV+</span>
-                        </label>
-                        <label class="option-label">
-                            <input type="checkbox" name="stream" value="337">
-                            <span class="option-text">Disney+</span>
-                        </label>
-                        <label class="option-label">
-                            <input type="checkbox" name="stream" value="230">
-                            <span class="option-text">Crave</span>
-                        </label>
-                        <label class="option-label">
-                            <input type="checkbox" name="stream" value="531">
-                            <span class="option-text">Paramount+</span>
-                        </label>
-                    </div>
-                    <div class="navigation">
-                        <button type="button" class="btn btn-secondary" onclick="navigateTo('date')">Previous</button>
-                        <button type="submit" class="btn">Next</button>
-                    </div>
-                </form>
-            `,
-            rating: `
-                <form class="question-form" id="ratingForm" onsubmit="handleRatingSubmit(event)">
-                    <h2>How high a user score should the movie have on TMDB?</h2>
-                    <div class="options">
-                        <label class="option-label">
-                            <input name="rating" id="80" type="radio" value="8" required>
-                            <span class="option-text">80% +</span>
-                        </label>
-                        <label class="option-label">
-                            <input name="rating" id="70" type="radio" value="7">
-                            <span class="option-text">70% +</span>
-                        </label>
-                        <label class="option-label">
-                            <input name="rating" id="60" type="radio" value="6">
-                            <span class="option-text">60% +</span>
-                        </label>
-                        <label class="option-label">
-                            <input name="rating" id="50" type="radio" value="5">
-                            <span class="option-text">50% +</span>
-                        </label>
-                        <label class="option-label">
-                            <input name="rating" id="20" type="radio" value="2">
-                            <span class="option-text">Don't care</span>
-                        </label>
-                    </div>
-                    <div class="navigation">
-                        <button type="button" class="btn btn-secondary" onclick="navigateTo('streaming')">Previous</button>
-                        <button type="submit" class="btn">Next</button>
-                    </div>
-                </form>
-            `,
-            suggestions: `
-                <div class="movie-result" id="results">
-                    <div class="poster" id="suggestion1">
-                        <!-- Poster image will be dynamically inserted here -->
-                    </div>
+        // Define question steps
+        const steps = [
+            {
+                id: 'language',
+                title: 'Language',
+                question: 'In which language do you want your movie to be?',
+                options: [
+                    { id: '1', value: 'en', label: 'English' },
+                    { id: '2', value: 'fr', label: 'French' }
+                ],
+                required: true,
+                onSubmit: function(value) {
+                    sessionStorage.pageNumber = 1;
+                    sessionStorage.setItem("language", value);
+                    console.log("Language selected:", value);
+                    return true;
+                },
+                getSummary: function() {
+                    const lang = sessionStorage.getItem("language");
+                    return lang === 'en' ? 'English' : 'French';
+                }
+            },
+            {
+                id: 'genre',
+                title: 'Genre',
+                question: 'Which genre do you want to watch?',
+                options: [
+                    { id: 'action', value: '28', label: 'Action 🔫' },
+                    { id: 'comedy', value: '35', label: 'Comedy 🤣' },
+                    { id: 'drama', value: '18', label: 'Drama 😢' },
+                    { id: 'romance', value: '10749', label: 'Romance 😍' },
+                    { id: 'mystery', value: '9648', label: 'Mystery 🤔' },
+                    { id: 'fantasy', value: '14', label: 'Fantasy 🧙' },
+                    { id: 'horror', value: '27', label: 'Horror 💀' },
+                    { id: 'scifi', value: '878', label: 'Science Fiction 🪐' }
+                ],
+                required: true,
+                onSubmit: function(value) {
+                    sessionStorage.setItem("genre", value);
+                    console.log("Genre selected:", value);
+                    return true;
+                },
+                getSummary: function() {
+                    const genreId = sessionStorage.getItem("genre");
+                    const genreMap = {
+                        '28': 'Action',
+                        '35': 'Comedy',
+                        '18': 'Drama',
+                        '10749': 'Romance',
+                        '9648': 'Mystery',
+                        '14': 'Fantasy',
+                        '27': 'Horror',
+                        '878': 'Science Fiction'
+                    };
+                    return genreMap[genreId] || 'Not selected';
+                }
+            },
+            {
+                id: 'date',
+                title: 'Release Date',
+                question: 'How recent should the movie be?',
+                options: [
+                    { id: '1', value: '1', label: 'Last year' },
+                    { id: '5', value: '5', label: 'Last 5 years' },
+                    { id: '10', value: '10', label: 'Last 10 years' },
+                    { id: '20', value: '20', label: 'Last 20 years' },
+                    { id: '40', value: '40', label: 'Last 40 years' },
+                    { id: '100', value: '100', label: 'Don\'t care' }
+                ],
+                required: true,
+                onSubmit: function(value) {
+                    const years = value;
+                    const current = new Date();
+                    let delta = parseInt(years);
                     
-                    <div class="movie-details">
-                        <h2 class="movie-title" id="title">Loading...</h2>
-                        
-                        <div class="movie-info">
-                            <div class="info-item">
-                                <span class="info-label">Released:</span>
-                                <span id="date">-</span>
-                            </div>
-                            
-                            <div class="info-item">
-                                <span class="info-label">Genre:</span>
-                                <span id="genre">-</span>
-                            </div>
-                            
-                            <div class="info-item">
-                                <span class="info-label">Rating:</span>
-                                <span id="rating">-</span><span>/10</span>
-                            </div>
-                            
-                            <div class="info-item">
-                                <span class="info-label">Streaming on:</span>
-                                <span id="streaming">Loading...</span>
-                            </div>
-                        </div>
-                        
-                        <div class="movie-overview">
-                            <h3>Overview</h3>
-                            <p id="overview">Loading movie information...</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="action-buttons">
-                    <button type="button" class="btn btn-secondary" onclick="navigateTo('rating')">Previous</button>
-                    <button type="button" class="btn" onclick="navigateTo('suggestions')">New Choice</button>
-                    <button type="button" class="btn btn-accent" onclick="navigateTo('language')">Start Over</button>
-                </div>
-            `
-        };
-
-        // Navigation functions
-        function navigateTo(page) {
-            const isLocal = window.location.protocol === 'file:';
-            if (isLocal) {
-                // For local development, just update the state without pushing to history
-                renderPage(page);
-            } else {
-                // For hosted environment, use history API
-                window.history.pushState({ page }, '', '/');
-                renderPage(page);
+                    const minDate = new Date(current.getFullYear() - delta, current.getMonth(), current.getDate());
+                    const formattedDate = minDate.toISOString().split('T')[0];
+                    
+                    sessionStorage.setItem("date", formattedDate);
+                    console.log("Earliest release date:", formattedDate);
+                    return true;
+                },
+                getSummary: function() {
+                    // Find the label from saved value
+                    const dateStr = sessionStorage.getItem("date");
+                    if (!dateStr) return 'Not selected';
+                    
+                    const now = new Date();
+                    const savedDate = new Date(dateStr);
+                    const yearDiff = now.getFullYear() - savedDate.getFullYear();
+                    
+                    // Find the closest match to display in summary
+                    if (yearDiff <= 1) return 'Last year';
+                    if (yearDiff <= 5) return 'Last 5 years';
+                    if (yearDiff <= 10) return 'Last 10 years';
+                    if (yearDiff <= 20) return 'Last 20 years';
+                    if (yearDiff <= 40) return 'Last 40 years';
+                    return 'Any time';
+                }
+            },
+            {
+                id: 'streaming',
+                title: 'Streaming Services',
+                question: 'Which streaming services do you have?',
+                options: [
+                    { id: 'netflix', value: '8', label: 'Netflix' },
+                    { id: 'prime', value: '119', label: 'Amazon Prime' },
+                    { id: 'apple', value: '350', label: 'Apple TV+' },
+                    { id: 'disney', value: '337', label: 'Disney+' },
+                    { id: 'crave', value: '230', label: 'Crave' },
+                    { id: 'paramount', value: '531', label: 'Paramount+' }
+                ],
+                isCheckbox: true,
+                required: true,
+                onSubmit: function(values) {
+                    if (values.length === 0) {
+                        alert("Please select at least one streaming service");
+                        return false;
+                    }
+                    
+                    sessionStorage.setItem("stream", values.join('|'));
+                    console.log("Streaming services selected:", values);
+                    return true;
+                },
+                getSummary: function() {
+                    const streamStr = sessionStorage.getItem("stream");
+                    if (!streamStr) return 'Not selected';
+                    
+                    const services = streamStr.split('|');
+                    const providerMap = {
+                        '8': 'Netflix',
+                        '119': 'Amazon Prime',
+                        '350': 'Apple TV+',
+                        '337': 'Disney+',
+                        '230': 'Crave',
+                        '531': 'Paramount+'
+                    };
+                    
+                    const serviceNames = services.map(id => providerMap[id] || id);
+                    if (serviceNames.length <= 2) {
+                        return serviceNames.join(', ');
+                    } else {
+                        return `${serviceNames.length} services selected`;
+                    }
+                }
+            },
+            {
+                id: 'rating',
+                title: 'User Rating',
+                question: 'How high a user score should the movie have on TMDB?',
+                options: [
+                    { id: '80', value: '8', label: '80% +' },
+                    { id: '70', value: '7', label: '70% +' },
+                    { id: '60', value: '6', label: '60% +' },
+                    { id: '50', value: '5', label: '50% +' },
+                    { id: '20', value: '2', label: 'Don\'t care' }
+                ],
+                required: true,
+                onSubmit: function(value) {
+                    sessionStorage.setItem("previousMovies", JSON.stringify([]));
+                    sessionStorage.setItem("availableMovies", JSON.stringify([]));
+                    
+                    sessionStorage.setItem("rating", value);
+                    console.log("Minimum rating selected:", value);
+                    return true;
+                },
+                getSummary: function() {
+                    const rating = sessionStorage.getItem("rating");
+                    if (!rating) return 'Not selected';
+                    
+                    const ratingMap = {
+                        '8': '80% +',
+                        '7': '70% +',
+                        '6': '60% +',
+                        '5': '50% +',
+                        '2': 'Any rating'
+                    };
+                    
+                    return ratingMap[rating] || rating + '0% +';
+                }
             }
-        }
+        ];
 
-        function renderPage(page) {
-            const content = document.getElementById('pageContent');
-            const subtitle = document.getElementById('pageSubtitle');
+        // Current step tracker
+        let currentStep = 0;
+        
+        // Initialize the application
+        function initApp() {
+            // Start with language step
+            renderStep(0, true);
+        }
+        
+        // Render a specific step
+        function renderStep(stepIndex, isNew = false) {
+            const container = document.getElementById('wizard-container');
+            const step = steps[stepIndex];
             
-            if (!pages[page]) {
-                // Default to language page if invalid page
-                page = 'language';
-            }
-            
-            content.innerHTML = pages[page];
-            
-            if (page === 'suggestions') {
-                subtitle.textContent = 'We found a movie for you!';
-                getChoices();
-            } else {
-                subtitle.textContent = 'Stop scrolling. Start watching.';
-            }
-        }
-
-        // Form submission handlers
-        function handleLanguageSubmit(event) {
-            event.preventDefault();
-            language();
-            navigateTo('genre');
-        }
-
-        function handleGenreSubmit(event) {
-            event.preventDefault();
-            genre();
-            navigateTo('date');
-        }
-
-        function handleDateSubmit(event) {
-            event.preventDefault();
-            date();
-            navigateTo('streaming');
-        }
-
-        function handleStreamingSubmit(event) {
-            event.preventDefault();
-            const selectedServices = Array.from(document.querySelectorAll('input[name="stream"]:checked'))
-                .map(cb => cb.value)
-                .join('|');
-            
-            if (!selectedServices) {
-                alert("Please select at least one streaming service");
+            // If we're on movie results step, render that differently
+            if (stepIndex >= steps.length) {
+                renderMovieResults();
                 return;
             }
             
-            sessionStorage.setItem("stream", selectedServices);
-            navigateTo('rating');
+            // If this is a new step, add it to the DOM
+            if (isNew) {
+                const cardElement = document.createElement('div');
+                cardElement.id = `card-${step.id}`;
+                cardElement.className = 'question-card active';
+                cardElement.dataset.stepIndex = stepIndex;
+                
+                // Generate options HTML based on the step type
+                let optionsHtml = '';
+                
+                if (step.id === 'streaming') {
+                    // Special handling for streaming services (checkboxes)
+                    const savedValues = sessionStorage.getItem('stream');
+                    const checkedValues = savedValues ? savedValues.split('|') : [];
+                    
+                    optionsHtml = step.options.map(option => `
+                        <label class="option-label">
+                            <input 
+                                name="${step.id}" 
+                                id="${option.id}" 
+                                type="checkbox" 
+                                value="${option.value}"
+                                ${checkedValues.includes(option.value) ? 'checked' : ''}
+                            >
+                            <span class="option-text">${option.label}</span>
+                        </label>
+                    `).join('');
+                } 
+                else if (step.id === 'date') {
+                    // Special handling for date selection
+                    const dateStr = sessionStorage.getItem(step.id);
+                    let valueToSelect = '';
+                    
+                    if (dateStr) {
+                        const now = new Date();
+                        const savedDate = new Date(dateStr);
+                        const yearDiff = now.getFullYear() - savedDate.getFullYear();
+                        
+                        // Determine which option to select based on year difference
+                        if (yearDiff <= 1) valueToSelect = '1';
+                        else if (yearDiff <= 5) valueToSelect = '5';
+                        else if (yearDiff <= 10) valueToSelect = '10';
+                        else if (yearDiff <= 20) valueToSelect = '20';
+                        else if (yearDiff <= 40) valueToSelect = '40';
+                        else valueToSelect = '100';
+                    }
+                    
+                    optionsHtml = step.options.map(option => `
+                        <label class="option-label">
+                            <input 
+                                name="${step.id}" 
+                                id="${option.id}" 
+                                type="radio" 
+                                value="${option.value}" 
+                                ${step.required ? 'required' : ''}
+                                ${option.value === valueToSelect ? 'checked' : ''}
+                            >
+                            <span class="option-text">${option.label}</span>
+                        </label>
+                    `).join('');
+                }
+                else {
+                    // Standard handling for radio button options
+                    const savedValue = sessionStorage.getItem(step.id);
+                    
+                    optionsHtml = step.options.map(option => `
+                        <label class="option-label">
+                            <input 
+                                name="${step.id}" 
+                                id="${option.id}" 
+                                type="radio" 
+                                value="${option.value}" 
+                                ${step.required ? 'required' : ''}
+                                ${option.value === savedValue ? 'checked' : ''}
+                            >
+                            <span class="option-text">${option.label}</span>
+                        </label>
+                    `).join('');
+                }
+                
+                // Build the card HTML
+                cardElement.innerHTML = `
+                    <div class="card-header">
+                        <h2 class="card-title">${step.title}</h2>
+                        <span class="card-selection" id="selection-${step.id}">Not selected</span>
+                    </div>
+                    <div class="card-content">
+                        <form class="question-form" id="form-${step.id}">
+                            <div class="question-wrapper">
+                                <h3>${step.question}</h3>
+                                <div class="options">
+                                    ${optionsHtml}
+                                </div>
+                            </div>
+                            <div class="cards-navigation">
+                                ${stepIndex > 0 ? `<button type="button" class="btn btn-secondary" onclick="goToPreviousStep()">Previous</button>` : ''}
+                                <button type="submit" class="btn">Next</button>
+                            </div>
+                        </form>
+                    </div>
+                `;
+                
+                container.appendChild(cardElement);
+                
+                // Set up form submission
+                const form = document.getElementById(`form-${step.id}`);
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    submitStep(stepIndex);
+                });
+                
+                // Set up card header click to expand/collapse
+                const cardHeader = cardElement.querySelector('.card-header');
+                cardHeader.addEventListener('click', function() {
+                    if (cardElement.classList.contains('collapsed')) {
+                        expandCard(stepIndex);
+                    }
+                });
+            }
+            
+            // Make sure this step is active and others are collapsed
+            for (let i = 0; i < steps.length; i++) {
+                const cardEl = document.getElementById(`card-${steps[i].id}`);
+                if (cardEl) {
+                    if (i === stepIndex) {
+                        cardEl.classList.add('active');
+                        cardEl.classList.remove('collapsed');
+                    } else {
+                        cardEl.classList.remove('active');
+                        cardEl.classList.add('collapsed');
+                    }
+                }
+            }
+            
+            // Update current step tracker
+            currentStep = stepIndex;
+            
+            // Update all selection summaries
+            updateAllSelectionSummaries();
+            
+            // Scroll to active card
+            const activeCard = document.querySelector('.question-card.active');
+            if (activeCard) {
+                activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+        
+        // Expand a card (make it active)
+        function expandCard(stepIndex) {
+            // Update all cards to collapsed except this one
+            for (let i = 0; i < steps.length; i++) {
+                const cardEl = document.getElementById(`card-${steps[i].id}`);
+                if (cardEl) {
+                    if (i === stepIndex) {
+                        cardEl.classList.add('active');
+                        cardEl.classList.remove('collapsed');
+                    } else {
+                        cardEl.classList.remove('active');
+                        cardEl.classList.add('collapsed');
+                    }
+                }
+            }
+            
+            // Update current step
+            currentStep = stepIndex;
+            
+            // Cache the saved values for steps after the current one
+            const savedValues = {};
+            for (let i = stepIndex + 1; i < steps.length; i++) {
+                const step = steps[i];
+                const value = sessionStorage.getItem(step.id);
+                if (value) {
+                    savedValues[step.id] = value;
+                }
+            }
+            
+            // If we're changing to an earlier step, remove any steps after the current max step that exists
+            const container = document.getElementById('wizard-container');
+            const allCards = container.querySelectorAll('.question-card');
+            
+            allCards.forEach(card => {
+                const cardStepIndex = parseInt(card.dataset.stepIndex);
+                // If this card is for a step beyond the one we're expanding, and it's not the results card
+                if (!isNaN(cardStepIndex) && cardStepIndex > stepIndex && card.id !== 'card-results') {
+                    card.remove();
+                }
+            });
+            
+            // Also remove any results card
+            const movieResultsCard = document.getElementById('card-results');
+            if (movieResultsCard) {
+                movieResultsCard.remove();
+            }
+            
+            // Scroll to the expanded card
+            const activeCard = document.querySelector('.question-card.active');
+            if (activeCard) {
+                activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+        
+        // Pre-select options based on session storage
+        function preSelectOptions(step) {
+            const storedValue = sessionStorage.getItem(step.id);
+            console.log(`Preselecting options for ${step.id}`, storedValue);
+            if (!storedValue) return;
+            
+            if (step.isCheckbox) {
+                // Clear any existing selections first
+                const allCheckboxes = document.querySelectorAll(`input[name="${step.id}"]`);
+                allCheckboxes.forEach(cb => cb.checked = false);
+                
+                // Now set the checked state based on stored values
+                const valueArray = storedValue.split('|');
+                console.log(`Setting checkboxes for ${step.id}:`, valueArray);
+                
+                valueArray.forEach(value => {
+                    const input = document.querySelector(`input[name="${step.id}"][value="${value}"]`);
+                    if (input) {
+                        input.checked = true;
+                        console.log(`Checked ${value}`);
+                    } else {
+                        console.log(`Could not find checkbox with value ${value}`);
+                    }
+                });
+            } else if (step.id === 'date') {
+                // Special handling for date which stores the full date but needs year span value
+                const dateStr = storedValue;
+                if (!dateStr) return;
+                
+                const now = new Date();
+                const savedDate = new Date(dateStr);
+                const yearDiff = now.getFullYear() - savedDate.getFullYear();
+                
+                // Find the closest match
+                let valueToSelect;
+                if (yearDiff <= 1) valueToSelect = '1';
+                else if (yearDiff <= 5) valueToSelect = '5';
+                else if (yearDiff <= 10) valueToSelect = '10';
+                else if (yearDiff <= 20) valueToSelect = '20';
+                else if (yearDiff <= 40) valueToSelect = '40';
+                else valueToSelect = '100';
+                
+                const input = document.querySelector(`input[name="${step.id}"][value="${valueToSelect}"]`);
+                if (input) input.checked = true;
+            } else {
+                const input = document.querySelector(`input[name="${step.id}"][value="${storedValue}"]`);
+                if (input) input.checked = true;
+            }
+        }
+        
+        // Submit current step
+        function submitStep(stepIndex) {
+            const step = steps[stepIndex];
+            
+            // Get selected values
+            let selectedValue;
+            if (step.isCheckbox) {
+                const checkboxes = document.querySelectorAll(`input[name="${step.id}"]:checked`);
+                selectedValue = Array.from(checkboxes).map(cb => cb.value);
+                console.log(`Submitting ${step.id} with values:`, selectedValue);
+            } else {
+                const radio = document.querySelector(`input[name="${step.id}"]:checked`);
+                selectedValue = radio ? radio.value : null;
+            }
+            
+            // Submit the value through the step's handler
+            const success = step.onSubmit(selectedValue);
+            if (!success) return;
+            
+            // Update the selection summary
+            updateSelectionSummary(step.id);
+            
+            // Go to next step
+            if (stepIndex < steps.length - 1) {
+                // Collapse this card
+                const currentCard = document.getElementById(`card-${step.id}`);
+                currentCard.classList.remove('active');
+                currentCard.classList.add('collapsed');
+                
+                // Check if next step already exists
+                const nextStepId = steps[stepIndex + 1].id;
+                const nextCard = document.getElementById(`card-${nextStepId}`);
+                
+                if (nextCard) {
+                    // Next card exists, just activate it
+                    renderStep(stepIndex + 1, false);
+                } else {
+                    // Next card doesn't exist, create it
+                    renderStep(stepIndex + 1, true);
+                }
+            } else {
+                // We've completed all steps, show results
+                renderMovieResults();
+            }
+        }
+        
+        // Update the selection summary text for a step
+        function updateSelectionSummary(stepId) {
+            const step = steps.find(s => s.id === stepId);
+            if (!step) return;
+            
+            const summaryEl = document.getElementById(`selection-${stepId}`);
+            if (summaryEl) {
+                summaryEl.textContent = step.getSummary();
+            }
+        }
+        
+        // Update all selection summaries
+        function updateAllSelectionSummaries() {
+            steps.forEach(step => {
+                updateSelectionSummary(step.id);
+            });
+        }
+        
+        // Go to previous step
+        function goToPreviousStep() {
+            if (currentStep > 0) {
+                renderStep(currentStep - 1);
+            }
+        }
+        
+        // Render the movie results
+        function renderMovieResults() {
+            const container = document.getElementById('wizard-container');
+            
+            // Collapse the last question card
+            const lastStepCard = document.getElementById(`card-${steps[steps.length - 1].id}`);
+            if (lastStepCard) {
+                lastStepCard.classList.remove('active');
+                lastStepCard.classList.add('collapsed');
+            }
+            
+            // Remove any existing results card
+            const existingResults = document.getElementById('card-results');
+            if (existingResults) {
+                existingResults.remove();
+            }
+            
+            // Create the results card
+            const resultsCard = document.createElement('div');
+            resultsCard.id = 'card-results';
+            resultsCard.className = 'question-card active';
+            
+            resultsCard.innerHTML = `
+                <div class="card-header">
+                    <h2 class="card-title">Your Movie</h2>
+                    <span class="card-selection">Ready to watch</span>
+                </div>
+                <div class="card-content">
+                    <div class="movie-result" id="results">
+                        <div class="poster" id="suggestion1">
+                            <!-- Poster image will be dynamically inserted here -->
+                        </div>
+                        
+                        <div class="movie-details">
+                            <h2 class="movie-title" id="title">Loading...</h2>
+                            
+                            <div class="movie-info">
+                                <div class="info-item">
+                                    <span class="info-label">Released:</span>
+                                    <span id="date">-</span>
+                                </div>
+                                
+                                <div class="info-item">
+                                    <span class="info-label">Genre:</span>
+                                    <span id="genre">-</span>
+                                </div>
+                                
+                                <div class="info-item">
+                                    <span class="info-label">Rating:</span>
+                                    <span id="rating">-</span><span>/10</span>
+                                </div>
+                                
+                                <div class="info-item">
+                                    <span class="info-label">Streaming on:</span>
+                                    <span id="streaming">Loading...</span>
+                                </div>
+                            </div>
+                            
+                            <div class="movie-overview">
+                                <h3>Overview</h3>
+                                <p id="overview">Loading movie information...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="cards-navigation">
+                        <button type="button" class="btn btn-secondary" onclick="expandCard(${steps.length - 1})">Back to Filters</button>
+                        <button type="button" class="btn" onclick="getChoices()">New Choice</button>
+                        <button type="button" class="btn btn-accent" onclick="resetApp()">Start Over</button>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(resultsCard);
+            
+            // Scroll to the results card
+            resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            // Update subtitle
+            document.getElementById('pageSubtitle').textContent = 'We found a movie for you!';
+            
+            // Fetch the movie suggestion
+            getChoices();
+        }
+        
+        // Reset the entire application
+        function resetApp() {
+            // Clear session storage
+            sessionStorage.clear();
+            
+            // Clear the container
+            const container = document.getElementById('wizard-container');
+            container.innerHTML = '';
+            
+            // Reset subtitle
+            document.getElementById('pageSubtitle').textContent = 'Stop scrolling. Start watching.';
+            
+            // Start over
+            initApp();
         }
 
-        function handleRatingSubmit(event) {
-            event.preventDefault();
-            getRating();
-            navigateTo('suggestions');
-        }
-
-        // Initialize the app
-        window.addEventListener('popstate', (event) => {
-            const page = event.state?.page || 'language';
-            renderPage(page);
-        });
-
-        // Start with language page
-        const isLocal = window.location.protocol === 'file:';
-        if (isLocal) {
-            renderPage('language');
-        } else {
-            window.history.replaceState({ page: 'language' }, '', '/');
-            renderPage('language');
-        }
+        // Start the application
+        window.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
