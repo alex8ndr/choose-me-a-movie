@@ -239,7 +239,8 @@
             if (isNew) {
                 const cardElement = document.createElement('div');
                 cardElement.id = `card-${step.id}`;
-                cardElement.className = 'question-card active';
+                // Start collapsed, not active
+                cardElement.className = 'question-card collapsed';
                 cardElement.dataset.stepIndex = stepIndex;
                 
                 // Generate options HTML based on the step type
@@ -353,18 +354,24 @@
                         expandCard(stepIndex);
                     }
                 });
-            }
-            
-            // Make sure this step is active and others are collapsed
-            for (let i = 0; i < steps.length; i++) {
-                const cardEl = document.getElementById(`card-${steps[i].id}`);
-                if (cardEl) {
-                    if (i === stepIndex) {
-                        cardEl.classList.add('active');
-                        cardEl.classList.remove('collapsed');
-                    } else {
-                        cardEl.classList.remove('active');
-                        cardEl.classList.add('collapsed');
+                
+                // Animate expand after DOM paint
+                requestAnimationFrame(() => {
+                    cardElement.classList.add('active');
+                    cardElement.classList.remove('collapsed');
+                });
+            } else {
+                // Only update classes for all cards if not creating a new one
+                for (let i = 0; i < steps.length; i++) {
+                    const cardEl = document.getElementById(`card-${steps[i].id}`);
+                    if (cardEl) {
+                        if (i === stepIndex) {
+                            cardEl.classList.add('active');
+                            cardEl.classList.remove('collapsed');
+                        } else {
+                            cardEl.classList.remove('active');
+                            cardEl.classList.add('collapsed');
+                        }
                     }
                 }
             }
@@ -510,22 +517,32 @@
             
             // Go to next step
             if (stepIndex < steps.length - 1) {
-                // Collapse this card
+                // Simultaneously collapse this card and activate the next
                 const currentCard = document.getElementById(`card-${step.id}`);
-                currentCard.classList.remove('active');
-                currentCard.classList.add('collapsed');
-                
-                // Check if next step already exists
                 const nextStepId = steps[stepIndex + 1].id;
-                const nextCard = document.getElementById(`card-${nextStepId}`);
-                
-                if (nextCard) {
-                    // Next card exists, just activate it
-                    renderStep(stepIndex + 1, false);
-                } else {
-                    // Next card doesn't exist, create it
+                let nextCard = document.getElementById(`card-${nextStepId}`);
+
+                // If next card doesn't exist, create it (but don't scroll yet)
+                if (!nextCard) {
                     renderStep(stepIndex + 1, true);
+                    nextCard = document.getElementById(`card-${nextStepId}`);
                 }
+
+                // Remove 'collapsed' from next, add 'active' to next
+                nextCard.classList.remove('collapsed');
+                nextCard.classList.add('active');
+                // Add 'collapsed' to current, remove 'active' from current
+                currentCard.classList.add('collapsed');
+                currentCard.classList.remove('active');
+
+                // Update current step tracker
+                currentStep = stepIndex + 1;
+                updateAllSelectionSummaries();
+
+                // Scroll to next card after a short delay for smoothness
+                setTimeout(() => {
+                    nextCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 50);
             } else {
                 // We've completed all steps, show results
                 renderMovieResults();
