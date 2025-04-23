@@ -111,7 +111,10 @@
                 },
                 getSummary: function() {
                     const lang = sessionStorage.getItem("language");
-                    return lang === 'en' ? 'English' : 'French';
+                    if (!lang) return 'Not selected';
+                    if (lang === 'en') return 'English';
+                    if (lang === 'fr') return 'French';
+                    return 'Not selected';
                 }
             },
             {
@@ -272,24 +275,35 @@
 
         // Current step tracker
         let currentStep = 0;
-        
+
         // Initialize the application
         function initApp() {
-            // Start with language step
-            renderStep(0, true);
+            // Render all steps as collapsed, only the first expanded
+            const container = document.getElementById('wizard-container');
+            container.innerHTML = '';
+            for (let i = 0; i < steps.length; i++) {
+                renderStep(i, true, i === 0);
+            }
+            currentStep = 0;
+            updateAllSelectionSummaries();
+            // Scroll to first card
+            const firstCard = document.querySelector('.question-card.active');
+            if (firstCard) {
+                firstCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         }
-        
+
         // Render a specific step
-        function renderStep(stepIndex, isNew = false) {
+        function renderStep(stepIndex, isNew = false, expand = false) {
             const container = document.getElementById('wizard-container');
             const step = steps[stepIndex];
-            
+
             // If we're on movie results step, render that differently
             if (stepIndex >= steps.length) {
                 renderMovieResults();
                 return;
             }
-            
+
             // If this is a new step, add it to the DOM
             if (isNew) {
                 const cardElement = document.createElement('div');
@@ -297,10 +311,10 @@
                 // Start collapsed, not active
                 cardElement.className = 'question-card collapsed';
                 cardElement.dataset.stepIndex = stepIndex;
-                
+
                 // Generate options HTML based on the step type
                 let optionsHtml = '';
-                
+
                 if (step.id === 'streaming') {
                     // Special handling for streaming services (checkboxes)
                     const savedValues = sessionStorage.getItem('stream');
@@ -387,7 +401,7 @@
                         </label>
                     `).join('');
                 }
-                
+
                 // Build the card HTML
                 cardElement.innerHTML = `
                     <div class="card-header">
@@ -409,16 +423,16 @@
                         </form>
                     </div>
                 `;
-                
+
                 container.appendChild(cardElement);
-                
+
                 // Set up form submission
                 const form = document.getElementById(`form-${step.id}`);
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
                     submitStep(stepIndex);
                 });
-                
+
                 // Set up card header click to expand/collapse
                 const cardHeader = cardElement.querySelector('.card-header');
                 cardHeader.addEventListener('click', function() {
@@ -426,12 +440,14 @@
                         expandCard(stepIndex);
                     }
                 });
-                
+
                 // Animate expand after DOM paint
-                requestAnimationFrame(() => {
-                    cardElement.classList.add('active');
-                    cardElement.classList.remove('collapsed');
-                });
+                if (expand) {
+                    requestAnimationFrame(() => {
+                        cardElement.classList.add('active');
+                        cardElement.classList.remove('collapsed');
+                    });
+                }
             } else {
                 // Only update classes for all cards if not creating a new one
                 for (let i = 0; i < steps.length; i++) {
@@ -447,20 +463,20 @@
                     }
                 }
             }
-            
+
             // Update current step tracker
             currentStep = stepIndex;
-            
+
             // Update all selection summaries
             updateAllSelectionSummaries();
-            
+
             // Scroll to active card
             const activeCard = document.querySelector('.question-card.active');
             if (activeCard) {
                 activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
-        
+
         // Expand a card (make it active)
         function expandCard(stepIndex) {
             // Update all cards to collapsed except this one
@@ -476,45 +492,29 @@
                     }
                 }
             }
-            
-            // Update current step
             currentStep = stepIndex;
-            
-            // Cache the saved values for steps after the current one
-            const savedValues = {};
-            for (let i = stepIndex + 1; i < steps.length; i++) {
-                const step = steps[i];
-                const value = sessionStorage.getItem(step.id);
-                if (value) {
-                    savedValues[step.id] = value;
-                }
-            }
-            
-            // If we're changing to an earlier step, remove any steps after the current max step that exists
+            updateAllSelectionSummaries();
+            // Remove any cards after this step
             const container = document.getElementById('wizard-container');
             const allCards = container.querySelectorAll('.question-card');
-            
             allCards.forEach(card => {
                 const cardStepIndex = parseInt(card.dataset.stepIndex);
-                // If this card is for a step beyond the one we're expanding, and it's not the results card
                 if (!isNaN(cardStepIndex) && cardStepIndex > stepIndex && card.id !== 'card-results') {
                     card.remove();
                 }
             });
-            
-            // Also remove any results card
+            // Remove results card if present
             const movieResultsCard = document.getElementById('card-results');
             if (movieResultsCard) {
                 movieResultsCard.remove();
             }
-            
             // Scroll to the expanded card
             const activeCard = document.querySelector('.question-card.active');
             if (activeCard) {
                 activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
-        
+
         // Pre-select options based on session storage
         function preSelectOptions(step) {
             const storedValue = sessionStorage.getItem(step.id);
@@ -564,7 +564,7 @@
                 if (input) input.checked = true;
             }
         }
-        
+
         // Submit current step
         function submitStep(stepIndex) {
             const step = steps[stepIndex];
@@ -620,7 +620,7 @@
                 renderMovieResults();
             }
         }
-        
+
         // Update the selection summary text for a step
         function updateSelectionSummary(stepId) {
             const step = steps.find(s => s.id === stepId);
@@ -631,21 +631,33 @@
                 summaryEl.textContent = step.getSummary();
             }
         }
-        
+
         // Update all selection summaries
         function updateAllSelectionSummaries() {
             steps.forEach(step => {
                 updateSelectionSummary(step.id);
             });
         }
-        
+
         // Go to previous step
         function goToPreviousStep() {
             if (currentStep > 0) {
-                renderStep(currentStep - 1);
+                // Show all cards up to currentStep-1, collapsed, and expand the previous one
+                const container = document.getElementById('wizard-container');
+                container.innerHTML = '';
+                for (let i = 0; i < steps.length; i++) {
+                    renderStep(i, true, i === currentStep - 1);
+                }
+                currentStep = currentStep - 1;
+                updateAllSelectionSummaries();
+                // Scroll to previous card
+                const prevCard = document.querySelector('.question-card.active');
+                if (prevCard) {
+                    prevCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
             }
         }
-        
+
         // Render the movie results
         function renderMovieResults() {
             const container = document.getElementById('wizard-container');

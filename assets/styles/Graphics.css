@@ -90,7 +90,7 @@ h1:hover {
 /* Card styling */
 .card {
   background: var(--card-bg);
-  padding: 1.5rem;
+  padding: 1rem;
   border-radius: var(--border-radius);
   box-shadow: var(--shadow);
   width: 100%;
