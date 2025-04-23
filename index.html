@@ -5,43 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Choose Me a Movie</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./assets/styles/Graphics.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">    <link rel="stylesheet" href="./assets/styles/Graphics.css">
     <script src="./Back-end/themoviedb.js"></script>
     <script src="./Back-end/fetch.js" defer></script>
-    <style>
-:root {
-  /* Card expand/collapse animation speeds (in seconds) */
-  --card-expand-speed: 0.4s;
-  --card-collapse-speed: 0.2s;
-  --card-expand-delay: 0s;
-  --card-collapse-delay: 0.05s;
-}
-.card-content {
-  transition:
-    max-height var(--card-expand-speed) cubic-bezier(.4,0,.2,1) var(--card-expand-delay),
-    opacity var(--card-expand-speed) var(--card-expand-delay),
-    margin-top var(--card-expand-speed) var(--card-expand-delay);
-}
-.question-card.collapsed .card-content {
-  transition:
-    max-height var(--card-collapse-speed) cubic-bezier(.4,0,.2,1) var(--card-collapse-delay),
-    opacity var(--card-collapse-speed) var(--card-collapse-delay),
-    margin-top var(--card-collapse-speed) var(--card-collapse-delay);
-}
-</style>
 </head>
 
 <body>
-    <div class="container">
-        <header>
-            <div style="display: flex; flex-direction: column; align-items: center; position: relative;">
-                <div style="width: 100%; max-width: 800px; margin: 0 auto; position: relative;">
-                    <h1 onclick="resetApp()" style="cursor: pointer">Choose Me a Movie</h1>
+    <div class="container">        <header>
+            <div class="header-container">
+                <div class="header-content">
+                    <h1 onclick="resetApp()" class="header-title">Choose Me a Movie</h1>
                     <p class="subtitle" id="pageSubtitle">Stop scrolling. Start watching.</p>
                 </div>
-                <div style="position: fixed; top: 1.2rem; right: 2vw; background: none; border-radius: 5px; box-shadow: none; padding: 0; min-width: 0; z-index: 1001;">
-                    <select id="country-select" style="padding: 0.18em 0.7em; border-radius: 5px; border: 1.5px solid #d1d5db; font-size: 0.97rem; background: #fff; color: #333; font-weight: 500; outline: none; min-width: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+                <div class="country-selector">
+                    <select id="country-select" class="country-select">
                         <option value="US">USA</option>
                         <option value="CA">CAN</option>
                     </select>
@@ -245,9 +222,8 @@
             {
                 id: 'rating',
                 title: 'User Rating',
-                question: 'How high a user score should the movie have on TMDB?',
+                question: 'What should be the movie\'s TMDB user score?',
                 options: [
-                    { id: '80', value: '8', label: '80% +' },
                     { id: '70', value: '7', label: '70% +' },
                     { id: '60', value: '6', label: '60% +' },
                     { id: '50', value: '5', label: '50% +' },
@@ -257,7 +233,6 @@
                 onSubmit: function(value) {
                     sessionStorage.setItem("previousMovies", JSON.stringify([]));
                     sessionStorage.setItem("availableMovies", JSON.stringify([]));
-                    
                     sessionStorage.setItem("rating", value);
                     console.log("Minimum rating selected:", value);
                     return true;
@@ -265,15 +240,12 @@
                 getSummary: function() {
                     const rating = sessionStorage.getItem("rating");
                     if (!rating) return 'Not selected';
-                    
                     const ratingMap = {
-                        '8': '80% +',
                         '7': '70% +',
                         '6': '60% +',
                         '5': '50% +',
                         '2': 'Any rating'
                     };
-                    
                     return ratingMap[rating] || rating + '0% +';
                 }
             }
