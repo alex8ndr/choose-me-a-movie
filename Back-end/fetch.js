@@ -119,7 +119,7 @@ const providerMap = {
     350: "Apple TV+",
     337: "Disney+",
     230: "Crave",
-    384: "Max",
+    1899: "Max",
     531: "Paramount+"
 };
 
@@ -177,7 +177,11 @@ function displayMovie(movie) {
         
         // Get user's selected streaming services
         const selectedServices = sessionStorage.getItem('stream').split('|').map(id => parseInt(id));
-        
+        // Use the selected country for streaming provider lookup
+        let country = 'CA';
+        try {
+            country = localStorage.getItem('country') || 'CA';
+        } catch (e) {}
         // Fetch streaming providers using the proper endpoint
         theMovieDb.movies.getExternalIds({
             id: movie.id
@@ -188,13 +192,12 @@ function displayMovie(movie) {
             }, (providerData) => {
                 try {
                     const providers = JSON.parse(providerData);
-                    if (providers.results && providers.results.CA && providers.results.CA.flatrate) {
-                        const streamingServices = providers.results.CA.flatrate;
+                    if (providers.results && providers.results[country] && providers.results[country].flatrate) {
+                        const streamingServices = providers.results[country].flatrate;
                         // Filter to only show selected services
                         const availableServices = streamingServices
-                            .filter(p => selectedServices.includes(p.provider_id))
+                            .filter(p => selectedServices.includes(parseInt(p.provider_id)))
                             .map(p => providerMap[p.provider_id] || p.provider_name);
-                        
                         if (availableServices.length > 0) {
                             document.getElementById("streaming").innerText = availableServices.join(", ");
                         } else {
@@ -285,7 +288,12 @@ function getChoices() {
         options.with_genres = parseInt(sessionStorage.getItem('genre'), 10);
         
         // Set streaming service filter - now with improved handling
-        options.watch_region = "CA";
+        // Use country from localStorage or fallback to 'CA'
+        let country = 'CA';
+        try {
+            country = localStorage.getItem('country') || 'CA';
+        } catch (e) {}
+        options.watch_region = country;
         const streamingServices = sessionStorage.getItem('stream');
         if (streamingServices) {
             options.with_watch_providers = streamingServices;

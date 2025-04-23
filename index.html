@@ -9,13 +9,44 @@
     <link rel="stylesheet" href="./assets/styles/Graphics.css">
     <script src="./Back-end/themoviedb.js"></script>
     <script src="./Back-end/fetch.js" defer></script>
+    <style>
+:root {
+  /* Card expand/collapse animation speeds (in seconds) */
+  --card-expand-speed: 0.4s;
+  --card-collapse-speed: 0.2s;
+  --card-expand-delay: 0s;
+  --card-collapse-delay: 0.05s;
+}
+.card-content {
+  transition:
+    max-height var(--card-expand-speed) cubic-bezier(.4,0,.2,1) var(--card-expand-delay),
+    opacity var(--card-expand-speed) var(--card-expand-delay),
+    margin-top var(--card-expand-speed) var(--card-expand-delay);
+}
+.question-card.collapsed .card-content {
+  transition:
+    max-height var(--card-collapse-speed) cubic-bezier(.4,0,.2,1) var(--card-collapse-delay),
+    opacity var(--card-collapse-speed) var(--card-collapse-delay),
+    margin-top var(--card-collapse-speed) var(--card-collapse-delay);
+}
+</style>
 </head>
 
 <body>
     <div class="container">
         <header>
-            <h1 onclick="resetApp()" style="cursor: pointer">Choose Me a Movie</h1>
-            <p class="subtitle" id="pageSubtitle">Stop scrolling. Start watching.</p>
+            <div style="display: flex; flex-direction: column; align-items: center; position: relative;">
+                <div style="width: 100%; max-width: 800px; margin: 0 auto; position: relative;">
+                    <h1 onclick="resetApp()" style="cursor: pointer">Choose Me a Movie</h1>
+                    <p class="subtitle" id="pageSubtitle">Stop scrolling. Start watching.</p>
+                </div>
+                <div style="position: fixed; top: 1.2rem; right: 2vw; background: none; border-radius: 5px; box-shadow: none; padding: 0; min-width: 0; z-index: 1001;">
+                    <select id="country-select" style="padding: 0.18em 0.7em; border-radius: 5px; border: 1.5px solid #d1d5db; font-size: 0.97rem; background: #fff; color: #333; font-weight: 500; outline: none; min-width: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+                        <option value="US">USA</option>
+                        <option value="CA">CAN</option>
+                    </select>
+                </div>
+            </div>
         </header>
         
         <main>
@@ -32,6 +63,39 @@
     </div>
 
     <script>
+        // --- Country selection logic ---
+        function getDefaultCountry() {
+            // Try to detect from browser language (e.g., en-US, fr-CA)
+            const lang = navigator.language || navigator.userLanguage || '';
+            const match = lang.match(/-([A-Z]{2})$/i);
+            if (match) return match[1].toUpperCase();
+            return 'US'; // fallback
+        }
+
+        function setCountryDropdown() {
+            const select = document.getElementById('country-select');
+            let country = localStorage.getItem('country');
+            if (!country) {
+                country = getDefaultCountry();
+                // Only set if it's a supported option
+                if (!Array.from(select.options).some(opt => opt.value === country)) {
+                    country = 'US';
+                }
+                localStorage.setItem('country', country);
+            }
+            select.value = country;
+        }
+
+        function setupCountryDropdown() {
+            const select = document.getElementById('country-select');
+            setCountryDropdown();
+            select.addEventListener('change', function() {
+                localStorage.setItem('country', select.value);
+                // Full reload to apply new country
+                window.location.reload();
+            });
+        }
+
         // Define question steps
         const steps = [
             {
@@ -141,7 +205,6 @@
                     { id: 'prime', value: '119', label: 'Amazon Prime' },
                     { id: 'apple', value: '350', label: 'Apple TV+' },
                     { id: 'disney', value: '337', label: 'Disney+' },
-                    { id: 'crave', value: '230', label: 'Crave' },
                     { id: 'paramount', value: '531', label: 'Paramount+' }
                 ],
                 isCheckbox: true,
@@ -167,6 +230,7 @@
                         '350': 'Apple TV+',
                         '337': 'Disney+',
                         '230': 'Crave',
+                        '1899': 'Max',
                         '531': 'Paramount+'
                     };
                     
@@ -250,8 +314,25 @@
                     // Special handling for streaming services (checkboxes)
                     const savedValues = sessionStorage.getItem('stream');
                     const checkedValues = savedValues ? savedValues.split('|') : [];
-                    
-                    optionsHtml = step.options.map(option => `
+                    // Determine country for streaming options
+                    let country = 'CA';
+                    try {
+                        country = localStorage.getItem('country') || 'CA';
+                    } catch (e) {}
+                    // Define streaming options by country
+                    let streamingOptions = [
+                        { id: 'netflix', value: '8', label: 'Netflix' },
+                        { id: 'prime', value: '119', label: 'Amazon Prime' },
+                        { id: 'apple', value: '350', label: 'Apple TV+' },
+                        { id: 'disney', value: '337', label: 'Disney+' },
+                        { id: 'paramount', value: '531', label: 'Paramount+' }
+                    ];
+                    if (country === 'CA') {
+                        streamingOptions.splice(4, 0, { id: 'crave', value: '230', label: 'Crave' });
+                    } else if (country === 'US') {
+                        streamingOptions.splice(4, 0, { id: 'max', value: '1899', label: 'Max' });
+                    }
+                    optionsHtml = streamingOptions.map(option => `
                         <label class="option-label">
                             <input 
                                 name="${step.id}" 
@@ -290,7 +371,7 @@
                                 id="${option.id}" 
                                 type="radio" 
                                 value="${option.value}" 
-                                ${step.required ? 'required' : ''}
+                                ${step.required ? 'required' : ''} 
                                 ${option.value === valueToSelect ? 'checked' : ''}
                             >
                             <span class="option-text">${option.label}</span>
@@ -308,7 +389,7 @@
                                 id="${option.id}" 
                                 type="radio" 
                                 value="${option.value}" 
-                                ${step.required ? 'required' : ''}
+                                ${step.required ? 'required' : ''} 
                                 ${option.value === savedValue ? 'checked' : ''}
                             >
                             <span class="option-text">${option.label}</span>
@@ -676,7 +757,10 @@
         }
 
         // Start the application
-        window.addEventListener('DOMContentLoaded', initApp);
+        window.addEventListener('DOMContentLoaded', function() {
+            setupCountryDropdown();
+            initApp();
+        });
     </script>
 </body>
 </html>
