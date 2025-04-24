@@ -490,7 +490,7 @@
 
         // Expand a card (make it active)
         function expandCard(stepIndex) {
-            // Update all cards to collapsed except this one
+            // Just update the active/collapsed states of existing cards
             for (let i = 0; i < steps.length; i++) {
                 const cardEl = document.getElementById(`card-${steps[i].id}`);
                 if (cardEl) {
@@ -503,22 +503,17 @@
                     }
                 }
             }
+            
+            // Update current step and summaries
             currentStep = stepIndex;
             updateAllSelectionSummaries();
-            // Remove any cards after this step
-            const container = document.getElementById('wizard-container');
-            const allCards = container.querySelectorAll('.question-card');
-            allCards.forEach(card => {
-                const cardStepIndex = parseInt(card.dataset.stepIndex);
-                if (!isNaN(cardStepIndex) && cardStepIndex > stepIndex && card.id !== 'card-results') {
-                    card.remove();
-                }
-            });
-            // Remove results card if present
+
+            // Remove any movie results if present
             const movieResultsCard = document.getElementById('card-results');
             if (movieResultsCard) {
                 movieResultsCard.remove();
             }
+            
             // Scroll to the expanded card
             const activeCard = document.querySelector('.question-card.active');
             if (activeCard) {
@@ -648,20 +643,26 @@
             steps.forEach(step => {
                 updateSelectionSummary(step.id);
             });
-        }
-
-        // Go to previous step
+        }        // Go to previous step
         function goToPreviousStep() {
             if (currentStep > 0) {
-                // Show all cards up to currentStep-1, collapsed, and expand the previous one
-                const container = document.getElementById('wizard-container');
-                container.innerHTML = '';
+                // Just update the active/collapsed states like expandCard
                 for (let i = 0; i < steps.length; i++) {
-                    renderStep(i, true, i === currentStep - 1);
+                    const cardEl = document.getElementById(`card-${steps[i].id}`);
+                    if (cardEl) {
+                        if (i === currentStep - 1) {
+                            cardEl.classList.add('active');
+                            cardEl.classList.remove('collapsed');
+                        } else {
+                            cardEl.classList.remove('active');
+                            cardEl.classList.add('collapsed');
+                        }
+                    }
                 }
                 currentStep = currentStep - 1;
                 updateAllSelectionSummaries();
-                // Scroll to previous card
+
+                // Scroll to the previous card
                 const prevCard = document.querySelector('.question-card.active');
                 if (prevCard) {
                     prevCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
