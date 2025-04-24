@@ -22,6 +22,12 @@
   --border-radius: 12px;
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   --transition: all 0.3s ease;
+  
+  /* Animation timings */
+  --fade-duration: 0.4s;
+  --fade-timing: cubic-bezier(.4,0,.2,1);
+  --slide-duration: 0.3s;
+  --slide-timing: ease;
 
   /* Animation timings */
   --card-expand-speed: 0.4s;
@@ -413,6 +419,9 @@ footer a {
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.4s cubic-bezier(.4,0,.2,1), visibility 0.4s cubic-bezier(.4,0,.2,1);
 }
 
 .question-card {
@@ -502,7 +511,7 @@ footer a {
 }
 
 .question-card {
-  animation: slideIn 0.3s ease forwards;
+  animation: slideIn var(--slide-duration) var(--slide-timing) forwards;
 }
 
 .question-card:nth-child(1) { animation-delay: 0s; }
@@ -580,10 +589,10 @@ footer a {
 
 /* Improved fade/slide for cards */
 .question-card.fade-in, .movie-result.fade-in {
-  animation: fadeInUp 0.45s cubic-bezier(.4,0,.2,1);
+  animation: fadeInUp var(--fade-duration) var(--fade-timing);
 }
 .question-card.fade-out, .movie-result.fade-out {
-  animation: fadeOutDown 0.35s cubic-bezier(.4,0,.2,1) forwards;
+  animation: fadeOutDown var(--fade-duration) var(--fade-timing) forwards;
 }
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(40px) scale(0.98); }
@@ -630,8 +639,8 @@ footer a {
     justify-content: center;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.4s cubic-bezier(.4,0,.2,1);
-    padding-top: calc(2rem + 100px); /* Add more spacing after subtitle */
+    transition: opacity var(--fade-duration) var(--fade-timing);
+    padding-top: calc(2rem + 100px);
 }
 
 #movie-overlay.active {
@@ -657,7 +666,8 @@ body.overlay-active {
 }
 
 .card, .cards-container {
-  transition: opacity 0.4s cubic-bezier(.4,0,.2,1), visibility 0.4s cubic-bezier(.4,0,.2,1);
+  transition: opacity var(--fade-duration) var(--fade-timing), 
+              visibility var(--fade-duration) var(--fade-timing);
 }
 
 .fade-out {
