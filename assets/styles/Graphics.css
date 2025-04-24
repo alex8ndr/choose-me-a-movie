@@ -106,14 +106,12 @@ h1:hover {
 
 /* Make sure all cards maintain consistent width */
 .cards-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
+  position: relative;
+  transition: height 0.5s cubic-bezier(.4,0,.2,1);
 }
-
+.cards-container.transitioning {
+  overflow: hidden;
+}
 .question-card {
   background: var(--card-bg);
   padding: 1.5rem;
@@ -555,6 +553,117 @@ footer a {
   outline: none;
   min-width: 0;
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+/* Overlay for movie card to prevent layout shift */
+.transition-overlay {
+  position: absolute !important;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.96);
+  box-shadow: 0 0 0 100vmax rgba(0,0,0,0.05);
+  margin: 0 !important;
+  padding: 0 !important;
+  animation: fadeInOverlay 0.5s cubic-bezier(.4,0,.2,1);
+}
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Improved fade/slide for cards */
+.question-card.fade-in, .movie-result.fade-in {
+  animation: fadeInUp 0.45s cubic-bezier(.4,0,.2,1);
+}
+.question-card.fade-out, .movie-result.fade-out {
+  animation: fadeOutDown 0.35s cubic-bezier(.4,0,.2,1) forwards;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(40px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes fadeOutDown {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(40px) scale(0.98); }
+}
+
+/* Remove top/bottom gap for overlay */
+#card-results.transition-overlay {
+  margin: 0 !important;
+  padding: 0 !important;
+  max-width: 800px;
+  min-height: 0;
+  box-shadow: var(--shadow);
+  background: var(--card-bg);
+}
+
+.movie-result {
+  padding: 0.5rem 0 0.5rem 0;
+  min-height: 0;
+}
+
+.cards-navigation {
+  margin-top: 1.2rem;
+}
+
+.cards-container {
+  position: relative;
+}
+
+/* Hide filter cards when movie is shown (handled by JS with display:none) */
+
+/* Movie Overlay Styling */
+#movie-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 1000;
+    background: transparent;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s cubic-bezier(.4,0,.2,1);
+    padding-top: calc(2rem + 100px); /* Add more spacing after subtitle */
+}
+
+#movie-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#movie-overlay .question-card {
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    max-width: 700px;
+    width: 100%;
+    margin: 0 auto;
+    animation: overlayCardIn 0.4s cubic-bezier(.4,0,.2,1);
+}
+
+@keyframes overlayCardIn {
+    from { transform: translateY(40px) scale(0.98); opacity: 0; }
+    to { transform: none; opacity: 1; }
+}
+
+body.overlay-active {
+    overflow: hidden !important;
+}
+
+.card, .cards-container {
+  transition: opacity 0.4s cubic-bezier(.4,0,.2,1), visibility 0.4s cubic-bezier(.4,0,.2,1);
+}
+
+.fade-out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 

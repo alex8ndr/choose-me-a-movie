@@ -32,6 +32,7 @@
                     <!-- Questions will be dynamically added here -->
                 </div>
             </div>
+            <div id="movie-overlay"></div>
         </main>
         
         <footer>
@@ -40,7 +41,7 @@
     </div>
 
     <script>
-        // --- Country selection logic ---
+        // --- Country selection logic ---        
         async function getDefaultCountry() {
             try {
                 // Try to get from IP first
@@ -201,7 +202,7 @@
                 question: 'Which streaming services do you have?',
                 options: [
                     { id: 'netflix', value: '8', label: 'Netflix' },
-                    { id: 'prime', value: '119', label: 'Amazon Prime' },
+                    { id: 'prime', value: '9', label: 'Amazon Prime' },
                     { id: 'apple', value: '350', label: 'Apple TV+' },
                     { id: 'disney', value: '337', label: 'Disney+' },
                     { id: 'paramount', value: '531', label: 'Paramount+' }
@@ -213,18 +214,29 @@
                         alert("Please select at least one streaming service");
                         return false;
                     }
-                    
-                    sessionStorage.setItem("stream", values.join('|'));
-                    console.log("Streaming services selected:", values);
+                    // Prime logic: use 9 for US, 119 for CA
+                    let country = 'CA';
+                    try {
+                        country = localStorage.getItem('country') || 'CA';
+                    } catch (e) {}
+                    let newValues = [...values];
+                    const primeIndex = newValues.indexOf('9');
+                    if (primeIndex !== -1) {
+                        if (country === 'CA') {
+                            newValues[primeIndex] = '119';
+                        } // else keep as '9' for US
+                    }
+                    sessionStorage.setItem("stream", newValues.join('|'));
+                    console.log("Streaming services selected:", newValues);
                     return true;
                 },
                 getSummary: function() {
                     const streamStr = sessionStorage.getItem("stream");
                     if (!streamStr) return 'Not selected';
-                    
                     const services = streamStr.split('|');
                     const providerMap = {
                         '8': 'Netflix',
+                        '9': 'Amazon Prime',
                         '119': 'Amazon Prime',
                         '350': 'Apple TV+',
                         '337': 'Disney+',
@@ -232,7 +244,6 @@
                         '1899': 'Max',
                         '531': 'Paramount+'
                     };
-                    
                     const serviceNames = services.map(id => providerMap[id] || id);
                     if (serviceNames.length <= 2) {
                         return serviceNames.join(', ');
@@ -327,7 +338,7 @@
                     // Define streaming options by country
                     let streamingOptions = [
                         { id: 'netflix', value: '8', label: 'Netflix' },
-                        { id: 'prime', value: '119', label: 'Amazon Prime' },
+                        { id: 'prime', value: '9', label: 'Amazon Prime' },
                         { id: 'apple', value: '350', label: 'Apple TV+' },
                         { id: 'disney', value: '337', label: 'Disney+' },
                         { id: 'paramount', value: '531', label: 'Paramount+' }
@@ -656,30 +667,20 @@
                     prevCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             }
-        }
-
-        // Render the movie results
-        function renderMovieResults() {
-            const container = document.getElementById('wizard-container');
-            
-            // Collapse the last question card
-            const lastStepCard = document.getElementById(`card-${steps[steps.length - 1].id}`);
-            if (lastStepCard) {
-                lastStepCard.classList.remove('active');
-                lastStepCard.classList.add('collapsed');
-            }
-            
-            // Remove any existing results card
-            const existingResults = document.getElementById('card-results');
-            if (existingResults) {
-                existingResults.remove();
-            }
-            
+        }        // Render the movie results
+        function renderMovieResults() {            // Hide all elements with a smooth transition
+            const filterContainer = document.getElementById('wizard-container');
+            const cardContainer = filterContainer.closest('.card');
+            cardContainer.classList.add('fade-out');
+            // Show overlay
+            const overlay = document.getElementById('movie-overlay');
+            overlay.innerHTML = '';
+            overlay.classList.add('active');
+            document.body.classList.add('overlay-active');
             // Create the results card
             const resultsCard = document.createElement('div');
             resultsCard.id = 'card-results';
-            resultsCard.className = 'question-card active';
-            
+            resultsCard.className = 'question-card active fade-in';
             resultsCard.innerHTML = `
                 <div class="card-header">
                     <h2 class="card-title">Your Movie</h2>
@@ -690,59 +691,63 @@
                         <div class="poster" id="suggestion1">
                             <!-- Poster image will be dynamically inserted here -->
                         </div>
-                        
                         <div class="movie-details">
                             <h2 class="movie-title" id="title">Loading...</h2>
-                            
                             <div class="movie-info">
                                 <div class="info-item">
                                     <span class="info-label">Released:</span>
                                     <span id="date">-</span>
                                 </div>
-                                
                                 <div class="info-item">
                                     <span class="info-label">Genre:</span>
                                     <span id="genre">-</span>
                                 </div>
-                                
                                 <div class="info-item">
                                     <span class="info-label">Rating:</span>
                                     <span id="rating">-</span><span>/10</span>
                                 </div>
-                                
                                 <div class="info-item">
                                     <span class="info-label">Streaming on:</span>
                                     <span id="streaming">Loading...</span>
                                 </div>
                             </div>
-                            
                             <div class="movie-overview">
                                 <h3>Overview</h3>
                                 <p id="overview">Loading movie information...</p>
                             </div>
                         </div>
                     </div>
-                    
                     <div class="cards-navigation">
-                        <button type="button" class="btn btn-secondary" onclick="expandCard(${steps.length - 1})">Back to Filters</button>
+                        <button type="button" class="btn btn-secondary" onclick="backToFilters()">Back to Filters</button>
                         <button type="button" class="btn" onclick="getChoices()">New Choice</button>
                         <button type="button" class="btn btn-accent" onclick="resetApp()">Start Over</button>
                     </div>
                 </div>
             `;
-            
-            container.appendChild(resultsCard);
-            
-            // Scroll to the results card
-            resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            
+            overlay.appendChild(resultsCard);
+            // Animate fade-in
+            setTimeout(() => { resultsCard.classList.remove('fade-in'); }, 400);
+            // Scroll to the results card (centered by overlay)
             // Update subtitle
             document.getElementById('pageSubtitle').textContent = 'We found a movie for you!';
-            
             // Fetch the movie suggestion
             getChoices();
         }
-        
+
+        // Smoothly transition back to filters from movie result
+        function backToFilters() {
+            const overlay = document.getElementById('movie-overlay');
+            overlay.classList.remove('active');
+            document.body.classList.remove('overlay-active');            // Show all elements back with a smooth transition
+            const filterContainer = document.getElementById('wizard-container');
+            const cardContainer = filterContainer.closest('.card');
+            cardContainer.classList.remove('fade-out');
+            // Update subtitle
+            document.getElementById('pageSubtitle').textContent = 'Stop scrolling. Start watching.';
+            // Remove overlay content after transition
+            setTimeout(() => { overlay.innerHTML = ''; }, 400);
+        }
+
         // Reset the entire application
         function resetApp() {
             // Clear session storage
