@@ -329,22 +329,133 @@ footer a {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .card {
-    padding: 1rem;
-  }
-  
-  .action-buttons {
-    flex-direction: column;
-  }
-  
-  .btn {
-    width: 100%;
-  }
+    :root {
+        --compact-padding: 0.8rem;
+        --border-radius: 10px;
+    }
 
-  h1 {
-    font-size: 2rem;
-    line-height: 1.2;
-  }
+    .container {
+        padding: 0.5rem;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    .subtitle {
+        font-size: 0.9rem;
+    }
+
+    .card {
+        padding: var(--compact-padding);
+    }
+
+    .question-card {
+        padding: var(--compact-padding);
+    }
+
+    .question-card.collapsed {
+        padding: 0.6rem var(--compact-padding);
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+    }
+
+    .card-selection {
+        font-size: 0.9rem;
+    }
+
+    .options {
+        grid-template-columns: 1fr;
+        gap: 0.3rem;
+    }
+
+    .option-label {
+        padding: 0.4rem 0.7rem;
+    }
+
+    .option-text {
+        font-size: 0.95rem;
+    }    /* Movie result mobile improvements */
+    .movie-result {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+
+    .poster {
+        max-width: 180px;
+        margin: 0 auto;
+    }
+
+    .movie-title {
+        font-size: 1.3rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .movie-info {
+        font-size: 0.85rem;
+    }
+
+    .info-label {
+        min-width: 90px;
+    }
+
+    .movie-overview {
+        font-size: 0.9rem;
+    }
+
+    .cards-navigation {
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+
+    .btn {
+        width: 100%;
+        padding: 0.5rem 1rem;
+        font-size: 0.95rem;
+    }
+
+    /* Adjust movie overlay spacing */
+    #movie-overlay {
+        padding: calc(1rem + 70px) 0.5rem 1rem 0.5rem;
+    }
+
+    #movie-overlay .question-card {
+        margin: 0 0.5rem;
+    }
+    
+    /* Show results spacer only on mobile */
+    .results-spacer {
+        display: block;
+    }
+}
+
+/* Hide results spacer on desktop/tablet */
+@media (min-width: 768px) {
+    .results-spacer {
+        display: none;
+    }
+}
+
+/* Small phone improvements */
+@media (max-width: 380px) {
+    .container {
+        padding: 0.3rem;
+    }
+
+    h1 {
+        font-size: 1.6rem;
+    }
+
+    .movie-title {
+        font-size: 1.3rem;
+    }
+
+    .info-label {
+        min-width: 90px;
+    }
 }
 
 /* Scrollbar styling */
@@ -611,11 +722,13 @@ footer a {
   min-height: 0;
   box-shadow: var(--shadow);
   background: var(--card-bg);
+  height: auto !important;
 }
 
 .movie-result {
   padding: 0.5rem 0 0.5rem 0;
   min-height: 0;
+  height: auto;
 }
 
 .cards-navigation {
@@ -641,6 +754,7 @@ footer a {
     pointer-events: none;
     transition: opacity var(--fade-duration) var(--fade-timing);
     padding-top: calc(2rem + 100px);
+    overflow-y: auto;
 }
 
 #movie-overlay.active {
@@ -654,6 +768,9 @@ footer a {
     width: 100%;
     margin: 0 auto;
     animation: overlayCardIn 0.4s cubic-bezier(.4,0,.2,1);
+    height: auto;
+    max-height: none;
+    overflow: hidden;
 }
 
 @keyframes overlayCardIn {

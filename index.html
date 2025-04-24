@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Choose Me a Movie</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">    <link rel="stylesheet" href="./assets/styles/Graphics.css">
@@ -723,6 +723,9 @@
                         <button type="button" class="btn" onclick="getChoices()">New Choice</button>
                         <button type="button" class="btn btn-accent" onclick="resetApp()">Start Over</button>
                     </div>
+                </div>
+                <div class="results-spacer">
+                    <br><br><br><br><br><br>
                 </div>
             `;
             overlay.appendChild(resultsCard);
