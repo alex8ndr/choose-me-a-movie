@@ -775,7 +775,10 @@
             
             // Start over
             initApp();
-        }        // Start the application
+            backToFilters();
+        }        
+        
+        // Start the application
         window.addEventListener('DOMContentLoaded', async function() {
             await setCountryDropdown();
             setupCountryDropdown();
