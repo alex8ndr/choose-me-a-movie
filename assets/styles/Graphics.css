@@ -5,6 +5,12 @@
   --secondary-color: #4facfe;
   --accent-color: #ff8a00;
   
+  /* Site link colors - customize these for different sites */
+  --site-link-gradient: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+  --site-link-size: 1.4rem;
+  --site-link-weight: 700;
+  --site-link-hover-scale: 1.05;
+  
   /* Background settings */
   --bg-opacity: 0.3; 
   --background-gradient: linear-gradient(135deg, 
@@ -650,9 +656,46 @@ footer a {
   cursor: pointer;
 }
 
-.country-selector {
+.website-link {
   position: fixed;
   top: 1.2rem;
+  left: 2vw;
+  background: none;
+  border-radius: 5px;
+  box-shadow: none;
+  padding: 0;
+  min-width: 0;
+  z-index: 1001;
+  display: none; /* Hidden by default for mobile */
+}
+
+.header-link {
+  text-decoration: none;
+  font-size: var(--site-link-size);
+  font-weight: var(--site-link-weight);
+  padding: 0.18em 0.4em;
+  background: var(--site-link-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transition: all 0.2s ease;
+}
+
+.header-link:hover {
+  transform: translateY(-1px) scale(var(--site-link-hover-scale));
+  opacity: 0.9;
+}
+
+/* Show website link on desktop */
+@media (min-width: 768px) {
+  .website-link {
+    display: block;
+  }
+}
+
+.country-selector {
+  position: fixed;
+  top: 1.35rem;
   right: 2vw;
   background: none;
   border-radius: 5px;
