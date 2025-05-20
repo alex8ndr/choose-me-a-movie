@@ -6,6 +6,7 @@
 // Global variables
 let options = {};
 let pageNumber = 1;
+let loadingTimeout;
 
 /**
  * Store user preferences in session storage
@@ -53,17 +54,14 @@ function date() {
 }
 
 function getStream() {
-    const selectedStream = document.querySelector('input[name="stream"]:checked');
-    if (selectedStream) {
-        sessionStorage.setItem("stream", selectedStream.value);
-        console.log("Streaming service selected:", sessionStorage.getItem("stream"));
-    }
+    // Already handled in the HTML with the new checkbox system
+    console.log("Streaming services selected:", sessionStorage.getItem("stream"));
 }
   
 function getRating() {
-    // Initialize empty array for tracking previously suggested movies
-    const empty = [];
-    sessionStorage.setItem("previousMovies", JSON.stringify(empty));
+    // Initialize empty arrays for tracking
+    sessionStorage.setItem("previousMovies", JSON.stringify([]));
+    sessionStorage.setItem("availableMovies", JSON.stringify([]));
 
     const selectedRating = document.querySelector('input[name="rating"]:checked');
     if (selectedRating) {
@@ -91,10 +89,47 @@ function getGenreName(genreId) {
 }
 
 /**
+ * Show loading state while movie info is being fetched
+ */
+function showLoading() {
+    const posterContainer = document.getElementById("suggestion1");
+    const title = document.getElementById("title");
+    const date = document.getElementById("date");
+    const rating = document.getElementById("rating");
+    const overview = document.getElementById("overview");
+    
+    if (posterContainer) posterContainer.innerHTML = '<div class="loading-spinner"></div>';
+    if (title) title.innerText = "Finding the perfect movie...";
+    if (date) date.innerText = "-";
+    if (rating) rating.innerText = "-";
+    if (overview) overview.innerText = "Loading movie information...";
+    
+    // Set a timeout to show error if loading takes too long
+    loadingTimeout = setTimeout(() => {
+        showError("Loading is taking longer than expected. Please try again.");
+    }, 10000);
+}
+
+/**
+ * Map provider IDs to their names
+ */
+const providerMap = {
+    8: "Netflix",
+    119: "Amazon Prime Video",
+    350: "Apple TV+",
+    337: "Disney+",
+    230: "Crave",
+    1899: "Max",
+    531: "Paramount+"
+};
+
+/**
  * Format movie data for display
  */
 function displayMovie(movie) {
     try {
+        clearTimeout(loadingTimeout);
+        
         // Extract movie data
         const title = movie.title;
         const rating = movie.vote_average;
@@ -105,12 +140,15 @@ function displayMovie(movie) {
         // Format overview text (limit length)
         if (overview && overview.length > 325) {
             let trimmedOverview = overview.substr(0, 325);
-            // End at a complete sentence
             trimmedOverview = trimmedOverview.substr(0, Math.min(trimmedOverview.length, trimmedOverview.lastIndexOf("."))) + ".";
             if (trimmedOverview.length > 50) {
                 overview = trimmedOverview;
             }
         }
+
+        // Create placeholder first
+        const posterContainer = document.getElementById("suggestion1");
+        posterContainer.innerHTML = '<div class="poster-placeholder">Loading poster...</div>';
         
         // Create image element for poster
         const posterPath = movie.poster_path;
@@ -123,22 +161,66 @@ function displayMovie(movie) {
             img.style.borderRadius = "var(--border-radius)";
             img.style.boxShadow = "var(--shadow)";
             
-            const posterContainer = document.getElementById("suggestion1");
             posterContainer.innerHTML = '';
             posterContainer.appendChild(img);
         };
         img.onerror = function() {
-            // Handle image loading error
-            document.getElementById("suggestion1").innerHTML = '<div class="poster-placeholder">Image not available</div>';
+            posterContainer.innerHTML = '<div class="poster-placeholder">Image not available</div>';
         };
-        img.src = posterUrl;
         
-        // Update page elements with movie info
+        // Update text content first
         document.getElementById("title").innerText = title;
         document.getElementById("date").innerText = releaseDate;
         document.getElementById("rating").innerText = rating;
         document.getElementById("genre").innerText = getGenreName(parseInt(sessionStorage.getItem("genre"), 10));
         document.getElementById("overview").innerText = overview || "No overview available.";
+        
+        // Get user's selected streaming services
+        const selectedServices = sessionStorage.getItem('stream').split('|').map(id => parseInt(id));
+        // Use the selected country for streaming provider lookup
+        let country = 'CA';
+        try {
+            country = localStorage.getItem('country') || 'CA';
+        } catch (e) {}
+        // Fetch streaming providers using the proper endpoint
+        theMovieDb.movies.getExternalIds({
+            id: movie.id
+        }, (externalIdsResponse) => {
+            // After getting external IDs, fetch watch providers
+            theMovieDb.common.client({
+                url: "movie/" + movie.id + "/watch/providers" + theMovieDb.common.generateQuery()
+            }, (providerData) => {
+                try {
+                    const providers = JSON.parse(providerData);
+                    if (providers.results && providers.results[country] && providers.results[country].flatrate) {
+                        const streamingServices = providers.results[country].flatrate;
+                        // Filter to only show selected services
+                        const availableServices = streamingServices
+                            .filter(p => selectedServices.includes(parseInt(p.provider_id)))
+                            .map(p => providerMap[p.provider_id] || p.provider_name);
+                        if (availableServices.length > 0) {
+                            document.getElementById("streaming").innerText = availableServices.join(", ");
+                        } else {
+                            document.getElementById("streaming").innerText = "Not available on your services";
+                        }
+                    } else {
+                        document.getElementById("streaming").innerText = "Not available on your services";
+                    }
+                } catch (err) {
+                    console.error("Error parsing provider data:", err);
+                    document.getElementById("streaming").innerText = "Streaming info unavailable";
+                }
+            }, (error) => {
+                console.error("Error fetching watch providers:", error);
+                document.getElementById("streaming").innerText = "Streaming info unavailable";
+            });
+        }, (error) => {
+            console.error("Error fetching external IDs:", error);
+            document.getElementById("streaming").innerText = "Streaming info unavailable";
+        });
+        
+        // Load image last
+        img.src = posterUrl;
         
     } catch (err) {
         console.error("Error displaying movie:", err);
@@ -150,7 +232,29 @@ function displayMovie(movie) {
  * Show error message to user
  */
 function showError(message) {
-    alert(message);
+    // Clear loading state
+    clearTimeout(loadingTimeout);
+    
+    // Only show dialog for actual errors, not just no results
+    if (!message.includes("no movies found")) {
+        alert(message);
+    }
+    
+    // Update UI to show no results state
+    const posterContainer = document.getElementById("suggestion1");
+    const title = document.getElementById("title");
+    const overview = document.getElementById("overview");
+    
+    if (posterContainer) posterContainer.innerHTML = '<div class="no-results">No movies found</div>';
+    if (title) title.innerText = "No movies found";
+    if (overview) overview.innerText = "Try adjusting your criteria to find more movies.";
+    
+    // Disable the "New Choice" button if there are no more choices
+    const newChoiceBtn = document.querySelector('button[onclick="document.location=\'./suggestions.html\'"]');
+    if (newChoiceBtn) {
+        newChoiceBtn.disabled = true;
+        newChoiceBtn.classList.add('btn-disabled');
+    }
 }
 
 /**
@@ -158,6 +262,8 @@ function showError(message) {
  */
 function getChoices() {
     try {
+        showLoading();
+        
         // Get search parameters from session storage
         options = {};
         options.page = sessionStorage.pageNumber || 1;
@@ -181,14 +287,27 @@ function getChoices() {
         // Set genre
         options.with_genres = parseInt(sessionStorage.getItem('genre'), 10);
         
-        // Set streaming service filter
-        options.watch_region = "CA";
-        options.with_watch_providers = parseInt(sessionStorage.getItem('stream'), 10);
+        // Set streaming service filter - now with improved handling
+        // Use country from localStorage or fallback to 'CA'
+        let country = 'CA';
+        try {
+            country = localStorage.getItem('country') || 'CA';
+        } catch (e) {}
+        options.watch_region = country;
+        const streamingServices = sessionStorage.getItem('stream');
+        if (streamingServices) {
+            options.with_watch_providers = streamingServices;
+            // This tells the API to return movies that are on ANY of the selected services
+            options.with_watch_monetization_types = "flatrate";
+        }
         
         console.log("Search options:", options);
         
-        // Call The Movie Database API
-        theMovieDb.discover.getMovies(options, successFunction, errorFunction);
+        // Call The Movie Database API with a callback to log the raw response
+        theMovieDb.discover.getMovies(options, (response) => {
+            console.log("Raw API response:", response);
+            successFunction(response);
+        }, errorFunction);
     } catch (err) {
         console.error("Error getting movie choices:", err);
         showError("There was a problem fetching movies. Please try again.");
@@ -204,10 +323,12 @@ function successFunction(movies) {
         
         console.log(`Found ${movies.total_results} movies across ${movies.total_pages} pages`);
         
+        // Store available movies count
+        sessionStorage.setItem("availableMovies", movies.total_results);
+        
         // If no movies found, show error
         if (movies.total_results === 0) {
-            document.location = "./index.html";
-            alert("Sorry, no movies found for your criteria! Want to try again?");
+            showError("Sorry, no movies found for your criteria! Try adjusting your filters.");
             return;
         }
         
@@ -229,9 +350,8 @@ function successFunction(movies) {
         // Try to find a movie we haven't shown yet
         do {
             count++;
-            if (prevMovies.length > movies.total_results - 1 || count > maxAttempts) {
-                document.location = "./index.html";
-                alert("Sorry, no more movies found for your criteria! Want to try again?");
+            if (prevMovies.length >= movies.total_results || count > maxAttempts) {
+                showError("No more movies found for your criteria! Try adjusting your filters.");
                 return;
             }
             
@@ -240,8 +360,7 @@ function successFunction(movies) {
             try {
                 title = movies.results[movieNumber].title;
             } catch (err) {
-                document.location = "./index.html";
-                alert("Sorry, no movie found for your criteria! Want to try again?");
+                showError("Sorry, no movie found for your criteria! Try adjusting your filters.");
                 return;
             }
         } while (prevMovies.includes(title));
